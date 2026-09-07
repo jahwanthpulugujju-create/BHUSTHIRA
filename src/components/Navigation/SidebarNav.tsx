@@ -58,7 +58,30 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, onSelectTab }
       userSelect: 'none'
     }}>
       {/* Primary Navigation List */}
-      <div style={{ padding: '12px 8px' }}>
+      <div>
+        <div style={{
+          padding: '12px 14px',
+          borderBottom: '1px solid #e2e8f0',
+          background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <img
+            src="/logo-full.png"
+            alt="BHUSTHIRA — Stable Mines, Safer Tomorrows"
+            style={{
+              width: '100%',
+              maxWidth: '160px',
+              height: 'auto',
+              borderRadius: '4px',
+              objectFit: 'contain'
+            }}
+          />
+        </div>
+
+        <div style={{ padding: '10px 8px' }}>
         <div style={{
           fontSize: '10px',
           fontWeight: 700,
@@ -116,6 +139,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, onSelectTab }
             );
           })}
         </nav>
+      </div>
       </div>
 
       {/* Bottom Engineering Scope & Ethics Footnote */}

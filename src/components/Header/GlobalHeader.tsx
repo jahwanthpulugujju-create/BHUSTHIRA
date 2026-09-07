@@ -23,48 +23,48 @@ export const GlobalHeader: React.FC = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '0 20px',
-      height: '56px',
+      padding: '0 24px',
+      height: '66px',
       background: '#ffffff',
       borderBottom: '1px solid #e2e8f0',
       flexShrink: 0,
       zIndex: 50
     }}>
       {/* Brand & Technical Subtitle */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
         <img
-          src="/logo.png"
+          src="/logo-emblem.png"
           alt="BHUSTHIRA Logo"
           style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '6px',
+            width: '52px',
+            height: '52px',
+            borderRadius: '8px',
             objectFit: 'contain',
             background: '#ffffff',
-            border: '1px solid #e2e8f0',
-            padding: '2px',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+            border: '1.5px solid #cbd5e1',
+            padding: '3px',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
           }}
         />
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '15px', fontWeight: 700, letterSpacing: '-0.02em', color: '#0f172a' }}>
+            <span style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-0.02em', color: '#09332c' }}>
               BHUSTHIRA
             </span>
             <span style={{
               fontSize: '11px',
-              fontWeight: 600,
-              padding: '1px 6px',
+              fontWeight: 700,
+              padding: '2px 8px',
               borderRadius: '4px',
-              background: '#f1f5f9',
-              color: '#475569',
-              border: '1px solid #e2e8f0'
+              background: '#09332c',
+              color: '#ffffff',
+              letterSpacing: '0.04em'
             }}>
               SIH26025
             </span>
           </div>
-          <p style={{ fontSize: '11px', color: '#64748b', fontWeight: 500, lineHeight: 1 }} title="Real-Time Mine Subsidence Intelligence & Early Warning System">
-            Mine Intelligence & Early Warning
+          <p style={{ fontSize: '12px', color: '#475569', fontWeight: 600, margin: '2px 0 0 0', lineHeight: 1 }} title="Real-Time Mine Subsidence Intelligence & Early Warning System">
+            Real-Time Mine Subsidence Intelligence & Early Warning System
           </p>
         </div>
       </div>
