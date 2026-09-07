@@ -32,11 +32,10 @@ export const NodeDetailDrawer: React.FC = () => {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(15, 23, 42, 0.4)',
+      backgroundColor: 'rgba(15, 23, 42, 0.65)',
       zIndex: 998,
       display: 'flex',
-      justifyContent: 'flex-end',
-      backdropFilter: 'blur(2px)'
+      justifyContent: 'flex-end'
     }}>
       <div style={{
         width: '520px',

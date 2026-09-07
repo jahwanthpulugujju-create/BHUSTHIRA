@@ -1,6 +1,8 @@
 import type { RiskBand, ConfidenceLevel, RiskBreakdown, SystemAlert, SensorNode } from '../types';
 import type { ConsensusResult } from './consensusEngine';
 import type { SpatialAnalysisResult } from './spatialCorrelation';
+import { RISK_MODEL_CONFIG, getRiskBandForScore } from './riskConfig';
+import { formatSimulationTime } from '../utils/timeFormatters';
 
 export interface RiskEvaluationResult {
   riskScore: number; // 0 - 100
@@ -9,10 +11,13 @@ export interface RiskEvaluationResult {
   breakdown: RiskBreakdown;
   activeAlert: SystemAlert | null;
   recommendedResponse: string;
+  configVersion: string;
+  disclaimer: string;
 }
 
 /**
- * Evaluates current mine risk based on deformation consensus and kinematics.
+ * Evaluates current mine risk based on multi-sensor deformation consensus and kinematics.
+ * Configuration-driven, deterministic, and strictly decoupled between Risk Severity and Evidence Confidence.
  */
 export function evaluateMineRisk(
   simSecond: number,
@@ -20,33 +25,38 @@ export function evaluateMineRisk(
   consensus: ConsensusResult,
   spatial: SpatialAnalysisResult
 ): RiskEvaluationResult {
-  // If sensor fault, risk remains controlled (<28, NORMAL)
+  const { weights, disclaimer, version } = RISK_MODEL_CONFIG;
+
+  // 1. ISOLATED SENSOR FAULT HANDLING
+  // If a single transducer spikes abnormally but adjacent nodes show no movement and sensor health is degraded:
   if (spatial.isSuspectedSensorFault) {
     return {
       riskScore: 24,
       riskBand: 'NORMAL',
       confidence: 'LOW',
       breakdown: {
-        displacement: 40,
-        spatialCorrelation: 5,
+        displacement: 42,
+        spatialCorrelation: 6,
         tilt: 8,
         crack: 0,
-        vibration: 5,
+        vibration: 6,
         temporalAcceleration: 4
       },
       activeAlert: null,
-      recommendedResponse: 'Sensor diagnostic required: Verify Node N03 transducer calibration. No strata hazard indicated.'
+      recommendedResponse: 'Sensor diagnostic required: Verify Node N03 transducer calibration and physical seating. Low spatial agreement with surrounding instruments; strata hazard unconfirmed.',
+      configVersion: version,
+      disclaimer
     };
   }
 
-  // Calculate kinematics contributions across Panel B
+  // 2. KINEMATIC & SENSOR CONTRIBUTION METRICS
   const activeNodes = [nodes['N02'], nodes['N03'], nodes['N04']].filter(Boolean);
   const maxDisp = Math.max(...activeNodes.map(n => n ? n.displacement - n.baseline.displacement : 0), 0);
   const maxTilt = Math.max(...activeNodes.map(n => n ? n.tilt - n.baseline.tilt : 0), 0);
   const maxVib = Math.max(...activeNodes.map(n => n ? n.vibration - n.baseline.vibration : 0), 0);
   const hasCrack = activeNodes.some(n => n && n.crack_signal);
 
-  // Normalized breakdown items (0 - 100 for visual bars)
+  // Normalized component contributions (0 - 100 for visual progress bars)
   const dispContrib = Math.min(100, Math.round((maxDisp / 8.0) * 100));
   const tiltContrib = Math.min(100, Math.round((maxTilt / 1.8) * 100));
   const spatialContrib = Math.min(100, Math.round(spatial.clusterStrength * 100));
@@ -54,42 +64,38 @@ export function evaluateMineRisk(
   const vibContrib = Math.min(100, Math.round((maxVib / 0.5) * 100));
   const tempAccelContrib = Math.min(100, Math.round(consensus.normalizedScore * 95));
 
-  // Risk Score calculation:
-  // Combines deformation consensus score (70%) with peak kinematic displacement (30%)
-  const kinematicScore = (dispContrib * 0.4) + (tiltContrib * 0.3) + (crackContrib * 0.15) + (vibContrib * 0.15);
+  // Weighted kinematic composite score
+  const kinematicScore =
+    (dispContrib * (weights.displacement / (weights.displacement + weights.tilt + weights.vibration + weights.crack))) +
+    (tiltContrib * (weights.tilt / (weights.displacement + weights.tilt + weights.vibration + weights.crack))) +
+    (crackContrib * (weights.crack / (weights.displacement + weights.tilt + weights.vibration + weights.crack))) +
+    (vibContrib * (weights.vibration / (weights.displacement + weights.tilt + weights.vibration + weights.crack)));
+
+  // Blended composite: Consensus score (65%) + Kinematic score (35%)
   const blendedScore = (consensus.score * 0.65) + (kinematicScore * 0.35);
   
-  // Baseline floor ~16-20
-  const riskScore = Math.min(100, Math.max(16, Math.round(blendedScore)));
+  // Baseline floor ~ 18
+  const riskScore = Math.min(100, Math.max(18, Math.round(blendedScore)));
+  const riskBand = getRiskBandForScore(riskScore);
 
-  let riskBand: RiskBand = 'NORMAL';
-  let recommendedResponse = 'Routine strata monitoring. Maintain normal shift production cycle.';
-
-  if (riskScore >= 70) {
-    riskBand = 'CRITICAL';
-    recommendedResponse = 'Initiate Protocol DGMS-7A: Order immediate operational stand-down in Panel B. Verify face convergence and dispatch geotechnical safety team for visual inspection.';
-  } else if (riskScore >= 50) {
-    riskBand = 'WARNING';
-    recommendedResponse = 'Inspect and verify the affected zone according to mine safety procedures. Increase telemetry polling to 0.5Hz on Panel B gate roads.';
-  } else if (riskScore >= 30) {
-    riskBand = 'WATCH';
-    recommendedResponse = 'Advisory notification: Elevated strata deformation rate logged on Panel B. Alert shift under-manager to observe goaf edge monitors.';
+  // 3. NEUTRAL, DEFENSIBLE DECISION-SUPPORT RECOMMENDATIONS
+  let recommendedResponse = 'Routine strata monitoring. Baseline equilibrium active across monitored panels.';
+  if (riskBand === 'CRITICAL') {
+    recommendedResponse = 'Escalate the incident for immediate operator verification and follow applicable mine safety procedures.';
+  } else if (riskBand === 'WARNING') {
+    recommendedResponse = 'Inspect and verify the affected zone according to mine safety procedures.';
+  } else if (riskBand === 'WATCH') {
+    recommendedResponse = 'Continue enhanced monitoring and operator review of the affected zone.';
   }
 
-  // Construct active alert if in Watch, Warning, or Critical
+  // 4. CONSTRUCT ACTIVE ALERT
   let activeAlert: SystemAlert | null = null;
   if (riskBand !== 'NORMAL') {
-    const formatTime = (sec: number) => {
-      const m = Math.floor(sec / 60);
-      const s = sec % 60;
-      return `${String(14).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-    };
-
     activeAlert = {
       id: `ALT-${simSecond}-${riskBand}`,
-      timestamp: formatTime(simSecond),
+      timestamp: formatSimulationTime(simSecond),
       simSecond,
-      zone: 'Panel B / Longwall Face & Goaf Overburden',
+      zone: 'Panel B / Longwall Extraction Face',
       panel: 'Panel B',
       severity: riskBand,
       confidence: consensus.confidence,
@@ -102,37 +108,37 @@ export function evaluateMineRisk(
         {
           category: 'Spatial Correlation',
           finding: `${spatial.neighborAgreementRatio} demonstrating convergent ground movement vectors.`,
-          weight: 18,
+          weight: 25,
           verified: spatial.spatialCorrelationLevel !== 'LOW'
         },
         {
           category: 'Displacement',
-          finding: `Peak cumulative displacement ${maxDisp.toFixed(1)} mm above calibrated baseline.`,
-          weight: 22,
-          verified: maxDisp > 1.5
+          finding: `Peak cumulative displacement ${maxDisp.toFixed(1)} mm departing from calibrated baseline.`,
+          weight: 35,
+          verified: maxDisp > 1.2
         },
         {
           category: 'Tilt',
-          finding: `Surface inclination increased to ${maxTilt.toFixed(2)}° with sustained gradient.`,
-          weight: 16,
-          verified: maxTilt > 0.3
+          finding: `Surface inclination increased to ${maxTilt.toFixed(2)}° with continuous slope gradient.`,
+          weight: 15,
+          verified: maxTilt > 0.25
         },
         {
           category: 'Temporal Persistence',
-          finding: `Anomalous trend sustained across multiple observation windows without reset.`,
+          finding: `Deformation pattern persisted across sequential sampling intervals without transient recovery.`,
           weight: 15,
           verified: true
         },
         {
           category: 'Multi-Sensor Agreement',
-          finding: hasCrack ? 'Acoustic emission crack detection confirmed alongside mechanical strain.' : 'Strain and inclination sensors in multi-parameter agreement.',
-          weight: 14,
+          finding: hasCrack ? 'Acoustic crack emissions coincide with mechanical extensometer strain.' : 'Strain and inclination sensors in multi-parameter agreement.',
+          weight: 5,
           verified: hasCrack || maxVib > 0.1
         },
         {
           category: 'Sensor Health',
-          finding: 'Node battery and packet telemetry confirm valid transducer physical states.',
-          weight: 8,
+          finding: 'Node power telemetry and radio link quality verify active instrument integrity.',
+          weight: 5,
           verified: true
         }
       ],
@@ -154,6 +160,8 @@ export function evaluateMineRisk(
       temporalAcceleration: tempAccelContrib
     },
     activeAlert,
-    recommendedResponse
+    recommendedResponse,
+    configVersion: version,
+    disclaimer
   };
 }

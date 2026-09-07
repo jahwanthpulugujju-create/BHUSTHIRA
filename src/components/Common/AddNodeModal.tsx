@@ -8,22 +8,23 @@ export const AddNodeModal: React.FC = () => {
   const nextIndex = Object.keys(nodes).length + 1;
   const defaultId = `N0${nextIndex}`;
   
-  const [nodeName, setNodeName] = useState(`Surface Point ${nextIndex}`);
+  const [nodeName, setNodeName] = useState(`Surface Transducer ${nextIndex}`);
   const [selectedPanel, setSelectedPanel] = useState<'Panel A' | 'Panel B' | 'Panel C' | 'Panel D'>('Panel B');
+  const [sectorName, setSectorName] = useState('Central Goaf Crown');
 
   if (activeModal !== 'ADD_NODE') return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Default coordinates based on panel
-    let x = 440;
-    let y = 290;
-    if (selectedPanel === 'Panel A') { x = 250; y = 140; }
-    else if (selectedPanel === 'Panel B') { x = 480; y = 310; }
-    else if (selectedPanel === 'Panel C') { x = 700; y = 200; }
-    else if (selectedPanel === 'Panel D') { x = 500; y = 430; }
+    // Default percentage coordinates within target panel (0-100 coordinate space)
+    let x = 65;
+    let y = 30;
+    if (selectedPanel === 'Panel A') { x = 24; y = 22; }
+    else if (selectedPanel === 'Panel B') { x = 66; y = 32; }
+    else if (selectedPanel === 'Panel C') { x = 24; y = 62; }
+    else if (selectedPanel === 'Panel D') { x = 65; y = 68; }
 
-    addNewNode(nodeName, selectedPanel, x, y);
+    addNewNode(`${nodeName} (${sectorName})`, selectedPanel, x, y);
   };
 
   return (
@@ -33,27 +34,26 @@ export const AddNodeModal: React.FC = () => {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(15, 23, 42, 0.5)',
+      backgroundColor: 'rgba(15, 23, 42, 0.65)',
       zIndex: 1000,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '20px',
-      backdropFilter: 'blur(2px)'
+      padding: '20px'
     }}>
       <div style={{
         width: '460px',
         maxWidth: '100%',
         backgroundColor: '#ffffff',
-        borderRadius: '8px',
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+        borderRadius: '6px',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
         display: 'flex',
         flexDirection: 'column',
         border: '1px solid #cbd5e1'
       }}>
         {/* Header */}
         <div style={{
-          padding: '16px 20px',
+          padding: '14px 18px',
           borderBottom: '1px solid #e2e8f0',
           display: 'flex',
           justifyContent: 'space-between',
@@ -61,9 +61,9 @@ export const AddNodeModal: React.FC = () => {
           backgroundColor: '#f8fafc'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <PlusCircle size={18} color="#0284c7" />
-            <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>
-              Scale Deployment: Add Node ({defaultId})
+            <PlusCircle size={18} color="#09332c" />
+            <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>
+              Scale Network: Deploy New Node ({defaultId})
             </h2>
           </div>
           <button
@@ -74,15 +74,16 @@ export const AddNodeModal: React.FC = () => {
               cursor: 'pointer',
               color: '#64748b'
             }}
+            aria-label="Close add node modal"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form onSubmit={handleSubmit} style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#334155', marginBottom: '6px' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
               Assigned Node Identifier
             </label>
             <input
@@ -91,74 +92,91 @@ export const AddNodeModal: React.FC = () => {
               disabled
               style={{
                 width: '100%',
-                padding: '8px 12px',
+                padding: '7px 10px',
                 borderRadius: '4px',
                 border: '1px solid #e2e8f0',
                 backgroundColor: '#f1f5f9',
                 color: '#64748b',
                 fontFamily: 'monospace',
-                fontSize: '13px'
+                fontSize: '12px'
               }}
             />
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#334155', marginBottom: '6px' }}>
-              Installation Label / Description
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
+              Node Display Name
             </label>
             <input
               type="text"
               value={nodeName}
               onChange={(e) => setNodeName(e.target.value)}
-              placeholder="e.g. Surface Benchmark East"
               required
               style={{
                 width: '100%',
-                padding: '8px 12px',
+                padding: '7px 10px',
                 borderRadius: '4px',
                 border: '1px solid #cbd5e1',
-                fontSize: '13px'
+                fontSize: '12px'
               }}
             />
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#334155', marginBottom: '6px' }}>
-              Target Mining Panel Sector
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
+              Target Geotechnical Panel
             </label>
             <select
               value={selectedPanel}
-              onChange={(e) => setSelectedPanel(e.target.value as any)}
+              onChange={(e) => setSelectedPanel(e.target.value as 'Panel A' | 'Panel B' | 'Panel C' | 'Panel D')}
               style={{
                 width: '100%',
-                padding: '8px 12px',
+                padding: '7px 10px',
                 borderRadius: '4px',
                 border: '1px solid #cbd5e1',
-                fontSize: '13px',
+                fontSize: '12px',
                 backgroundColor: '#ffffff'
               }}
             >
-              <option value="Panel A">Panel A (Seam XI Barrier)</option>
-              <option value="Panel B">Panel B (Active Longwall Face)</option>
-              <option value="Panel C">Panel C (East Bord & Pillar)</option>
-              <option value="Panel D">Panel D (Deep Exploration Boundary)</option>
+              <option value="Panel A">Panel A (Continuous Miner North Seam XII)</option>
+              <option value="Panel B">Panel B (Active Longwall Retreat Face Seam XI)</option>
+              <option value="Panel C">Panel C (Bord & Pillar Depillaring Seam X)</option>
+              <option value="Panel D">Panel D (Heading Development Seam IX)</option>
             </select>
           </div>
 
-          <div style={{
-            padding: '12px',
-            backgroundColor: '#f0f9ff',
-            border: '1px solid #bae6fd',
-            borderRadius: '4px',
-            fontSize: '12px',
-            color: '#0369a1',
-            lineHeight: '1.4'
-          }}>
-            <strong>Scalability Notice:</strong> Upon adding, the new node will register with Gateway GW-01, establish baseline reference metrics, and participate in spatial neighborhood consensus evaluation.
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
+              Sector Description
+            </label>
+            <input
+              type="text"
+              value={sectorName}
+              onChange={(e) => setSectorName(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '7px 10px',
+                borderRadius: '4px',
+                border: '1px solid #cbd5e1',
+                fontSize: '12px'
+              }}
+            />
           </div>
 
-          {/* Buttons */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
+          <div style={{
+            padding: '10px 12px',
+            backgroundColor: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '4px',
+            fontSize: '11px',
+            color: '#475569'
+          }}>
+            <strong>Automatic Topology Binding:</strong> New node will dynamically register with Gateway <code>GW-01</code> and route telemetry through the on-site 868MHz wireless mesh.
+          </div>
+
+          {/* Action buttons */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '4px' }}>
             <button
               type="button"
               className="btn btn-secondary"
@@ -170,9 +188,9 @@ export const AddNodeModal: React.FC = () => {
             <button
               type="submit"
               className="btn btn-primary"
-              style={{ fontSize: '12px' }}
+              style={{ fontSize: '12px', backgroundColor: '#09332c', borderColor: '#09332c' }}
             >
-              Integrate Node
+              Deploy Sensor Node
             </button>
           </div>
         </form>

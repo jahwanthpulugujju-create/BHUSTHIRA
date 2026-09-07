@@ -22,11 +22,10 @@ export const EvidenceDrawer: React.FC = () => {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(15, 23, 42, 0.5)',
+      backgroundColor: 'rgba(15, 23, 42, 0.65)',
       zIndex: 999,
       display: 'flex',
-      justifyContent: 'flex-end',
-      backdropFilter: 'blur(2px)'
+      justifyContent: 'flex-end'
     }}>
       <div style={{
         width: '560px',

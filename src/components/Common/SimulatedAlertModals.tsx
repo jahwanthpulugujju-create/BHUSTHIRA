@@ -14,13 +14,12 @@ export const SimulatedAlertModals: React.FC = () => {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(15, 23, 42, 0.5)',
+      backgroundColor: 'rgba(15, 23, 42, 0.65)',
       zIndex: 1000,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '20px',
-      backdropFilter: 'blur(2px)'
+      padding: '20px'
     }}>
       {activeModal === 'MOBILE_SMS' && (
         <div style={{

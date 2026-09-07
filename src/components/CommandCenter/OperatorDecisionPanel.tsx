@@ -1,10 +1,11 @@
 import React from 'react';
 import { useSimulation } from '../../state/simulationContext';
-import { ShieldAlert, ShieldCheck, HelpCircle, ChevronRight } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, HelpCircle, ChevronRight, MapPin } from 'lucide-react';
 
 export const OperatorDecisionPanel: React.FC = () => {
   const {
     riskBand,
+    riskScore,
     consensusResult,
     spatialResult,
     riskResult,
@@ -54,14 +55,14 @@ export const OperatorDecisionPanel: React.FC = () => {
       </div>
 
       {/* Main Decision Hierarchy */}
-      <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto' }}>
+      <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', overflowY: 'auto' }}>
         {/* 1. Current Situation & Status */}
         <div>
-          <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '0.05em', marginBottom: '2px' }}>
-            Current Strata Status
+          <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em', marginBottom: '2px' }}>
+            Current Situation
           </div>
           <div style={{
-            fontSize: '18px',
+            fontSize: '17px',
             fontWeight: 700,
             color: riskBand === 'CRITICAL' ? '#dc2626' : riskBand === 'WARNING' ? '#ea580c' : riskBand === 'WATCH' ? '#d97706' : '#15803d'
           }}>
@@ -76,44 +77,49 @@ export const OperatorDecisionPanel: React.FC = () => {
           borderRadius: '6px',
           border: '1px solid #e2e8f0'
         }}>
-          <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', marginBottom: '2px' }}>
-            Target Affected Zone
+          <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <MapPin size={12} /> Affected Area
           </div>
-          <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
-            {spatialResult.affectedPanel !== 'None' ? `${spatialResult.affectedPanel} / Longwall Goaf Crown` : 'Mine-wide Equilibrium (No active zone)'}
+          <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
+            {spatialResult.affectedPanel !== 'None' ? `${spatialResult.affectedPanel} / Sector 03 (Longwall Goaf)` : 'Mine-wide Equilibrium (No active zone)'}
           </div>
           <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
-            Seam XI (High-Volatile Coking) • -240m Under-surface
+            Seam XI (Coking Coal) • Subsurface Level -240m
           </div>
         </div>
 
-        {/* 3. Decision Confidence & Consensus */}
+        {/* 3. Risk & Evidence Confidence (Separated as Mandated) */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
           <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '10px', fontWeight: 600, color: '#64748b' }}>CONFIDENCE</div>
+            <div style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>MINE RISK</div>
             <div style={{
-              fontSize: '13px',
-              fontWeight: 700,
-              color: consensusResult.confidence === 'HIGH' ? '#b91c1c' : consensusResult.confidence === 'MODERATE' ? '#b45309' : '#15803d'
+              fontSize: '16px',
+              fontWeight: 800,
+              color: riskScore > 75 ? '#dc2626' : riskScore > 50 ? '#ea580c' : riskScore > 25 ? '#d97706' : '#15803d'
             }}>
-              {consensusResult.confidence}
+              {riskScore} <span style={{ fontSize: '11px', fontWeight: 500, color: '#64748b' }}>/ 100</span>
             </div>
           </div>
 
           <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '10px', fontWeight: 600, color: '#64748b' }}>CONSENSUS</div>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
-              {consensusResult.score} / 100
+            <div style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>CONFIDENCE</div>
+            <div style={{
+              fontSize: '14px',
+              fontWeight: 800,
+              color: consensusResult.confidence === 'HIGH' ? '#15803d' : consensusResult.confidence === 'MODERATE' ? '#d97706' : '#64748b',
+              marginTop: '2px'
+            }}>
+              {consensusResult.confidence}
             </div>
           </div>
         </div>
 
         {/* 4. Primary Corroborated Evidence */}
         <div>
-          <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '0.05em', marginBottom: '4px' }}>
-            Primary Evidence Summary
+          <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em', marginBottom: '4px' }}>
+            Primary Evidence
           </div>
-          <p style={{ fontSize: '12px', color: '#334155', lineHeight: 1.45 }}>
+          <p style={{ fontSize: '12px', color: '#334155', lineHeight: 1.45, margin: 0 }}>
             {activeAlert ? activeAlert.primaryEvidence : consensusResult.summary}
           </p>
         </div>
@@ -132,21 +138,21 @@ export const OperatorDecisionPanel: React.FC = () => {
             color: isAlertActive ? '#b45309' : '#15803d',
             marginBottom: '3px'
           }}>
-            Recommended Protocol
+            Recommended Response
           </div>
-          <p style={{ fontSize: '11px', color: '#0f172a', fontWeight: 500, lineHeight: 1.4 }}>
+          <p style={{ fontSize: '11px', color: '#0f172a', fontWeight: 500, lineHeight: 1.4, margin: 0 }}>
             {riskResult.recommendedResponse}
           </p>
         </div>
 
-        {/* 6. Why Am I Seeing This Alert? Trigger Button */}
+        {/* 6. Why This Alert? Trigger Button */}
         <button
           onClick={() => setActiveModal('EVIDENCE')}
           className="btn-engineering primary"
           style={{ width: '100%', padding: '8px 12px', marginTop: 'auto' }}
         >
           <HelpCircle size={14} />
-          <span>WHY AM I SEEING THIS ALERT?</span>
+          <span>VIEW EVIDENCE & PIPELINE</span>
           <ChevronRight size={14} style={{ marginLeft: 'auto' }} />
         </button>
       </div>
@@ -163,7 +169,7 @@ export const OperatorDecisionPanel: React.FC = () => {
         color: '#64748b',
         fontFamily: 'var(--font-mono)'
       }}>
-        <span>NEXT ENGINE CYCLE:</span>
+        <span>EDGE TELEMETRY CYCLE:</span>
         <strong style={{ color: '#0f172a' }}>{intervalSec}s</strong>
       </div>
     </div>

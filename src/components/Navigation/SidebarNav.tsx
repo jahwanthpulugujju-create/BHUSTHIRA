@@ -27,28 +27,58 @@ interface SidebarNavProps {
   onSelectTab: (tab: NavTab) => void;
 }
 
+interface NavGroup {
+  groupName: string;
+  items: {
+    id: NavTab;
+    label: string;
+    icon: React.ElementType;
+    badge?: string | null;
+  }[];
+}
+
 export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, onSelectTab }) => {
   const { activeAlert } = useSimulation();
 
-  const navItems = [
-    { id: 'COMMAND_CENTER', label: 'Command Center', icon: LayoutDashboard, badge: null },
-    { id: 'MINE_MAP', label: 'Deformation Map', icon: Map, badge: null },
-    { id: 'SENSOR_NETWORK', label: 'Sensor Network', icon: Network, badge: null },
-    { id: 'DEFORMATION_INTEL', label: 'Intelligence Engine', icon: Cpu, badge: null },
+  const navGroups: NavGroup[] = [
     {
-      id: 'RISK_ALERTS',
-      label: 'Risk Engine',
-      icon: AlertTriangle,
-      badge: activeAlert ? activeAlert.severity : null
+      groupName: 'MONITOR',
+      items: [
+        { id: 'COMMAND_CENTER', label: 'Command Center', icon: LayoutDashboard },
+        { id: 'MINE_MAP', label: 'Deformation Map', icon: Map }
+      ]
     },
-    { id: 'INCIDENT_REPLAY', label: 'Incident Replay', icon: History, badge: null },
-    { id: 'SYSTEM_HEALTH', label: 'System Health', icon: Activity, badge: null },
-    { id: 'DEPLOYMENT_ARCH', label: 'Field Architecture', icon: Layers, badge: null }
+    {
+      groupName: 'ANALYZE',
+      items: [
+        { id: 'SENSOR_NETWORK', label: 'Sensor Network', icon: Network },
+        { id: 'DEFORMATION_INTEL', label: 'Intelligence Engine', icon: Cpu },
+        {
+          id: 'RISK_ALERTS',
+          label: 'Risk & Alerts',
+          icon: AlertTriangle,
+          badge: activeAlert ? activeAlert.severity : null
+        }
+      ]
+    },
+    {
+      groupName: 'REVIEW',
+      items: [
+        { id: 'INCIDENT_REPLAY', label: 'Incident Replay', icon: History },
+        { id: 'SYSTEM_HEALTH', label: 'System Health', icon: Activity }
+      ]
+    },
+    {
+      groupName: 'ARCHITECTURE',
+      items: [
+        { id: 'DEPLOYMENT_ARCH', label: 'Field Architecture', icon: Layers }
+      ]
+    }
   ];
 
   return (
     <aside style={{
-      width: '210px',
+      width: '215px',
       background: '#ffffff',
       borderRight: '1px solid #e2e8f0',
       display: 'flex',
@@ -57,12 +87,13 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, onSelectTab }
       flexShrink: 0,
       userSelect: 'none'
     }}>
-      {/* Primary Navigation List */}
-      <div>
+      {/* Upper Section: Brand Banner & Grouped Navigation */}
+      <div style={{ overflowY: 'auto' }}>
+        {/* Brand Header Banner */}
         <div style={{
-          padding: '12px 14px',
+          padding: '12px 16px',
           borderBottom: '1px solid #e2e8f0',
-          background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)',
+          background: '#f8fafc',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -73,92 +104,96 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, onSelectTab }
             alt="BHUSTHIRA — Stable Mines, Safer Tomorrows"
             style={{
               width: '100%',
-              maxWidth: '160px',
+              maxWidth: '150px',
               height: 'auto',
-              borderRadius: '4px',
-              objectFit: 'contain'
+              display: 'block'
             }}
           />
         </div>
 
-        <div style={{ padding: '10px 8px' }}>
-        <div style={{
-          fontSize: '10px',
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '0.06em',
-          color: '#94a3b8',
-          padding: '4px 10px 8px 10px'
-        }}>
-          Operations Rail
+        {/* Grouped Nav Items */}
+        <div style={{ padding: '8px 6px' }}>
+          {navGroups.map((group) => (
+            <div key={group.groupName} style={{ marginBottom: '10px' }}>
+              <div style={{
+                fontSize: '10px',
+                fontWeight: 700,
+                color: '#94a3b8',
+                letterSpacing: '0.06em',
+                padding: '4px 10px 4px 10px',
+                textTransform: 'uppercase'
+              }}>
+                {group.groupName}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => onSelectTab(item.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '7px 10px',
+                        borderRadius: '4px',
+                        border: 'none',
+                        borderLeft: isActive ? '3px solid #09332c' : '3px solid transparent',
+                        background: isActive ? '#f1f5f9' : 'transparent',
+                        color: isActive ? '#0f172a' : '#475569',
+                        fontSize: '12px',
+                        fontWeight: isActive ? 700 : 500,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'background 0.1s ease, color 0.1s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Icon size={15} color={isActive ? '#09332c' : '#64748b'} />
+                        <span>{item.label}</span>
+                      </div>
+
+                      {item.badge && (
+                        <span style={{
+                          fontSize: '9px',
+                          fontWeight: 700,
+                          padding: '1px 5px',
+                          borderRadius: '3px',
+                          background: item.badge === 'CRITICAL' ? '#dc2626' : '#ea580c',
+                          color: '#ffffff'
+                        }}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
-
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          {navItems.map(item => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => onSelectTab(item.id as NavTab)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '8px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid',
-                  borderColor: isActive ? '#0f172a' : 'transparent',
-                  background: isActive ? '#0f172a' : 'transparent',
-                  color: isActive ? '#ffffff' : '#334155',
-                  fontSize: '12px',
-                  fontWeight: isActive ? 600 : 500,
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.12s ease'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
-                  <Icon size={16} color={isActive ? '#ffffff' : '#64748b'} />
-                  <span>{item.label}</span>
-                </div>
-
-                {item.badge && (
-                  <span style={{
-                    fontSize: '9px',
-                    fontWeight: 700,
-                    padding: '1px 5px',
-                    borderRadius: '4px',
-                    background: item.badge === 'CRITICAL' ? '#dc2626' : '#ea580c',
-                    color: '#ffffff'
-                  }}>
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-      </div>
       </div>
 
-      {/* Bottom Engineering Scope & Ethics Footnote */}
+      {/* Bottom Operational Integrity Note */}
       <div style={{
-        padding: '12px',
+        padding: '10px 12px',
         borderTop: '1px solid #e2e8f0',
-        background: '#f8fafc'
+        background: '#f8fafc',
+        fontSize: '11px',
+        color: '#64748b'
       }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', marginBottom: '6px' }}>
-          <Info size={13} color="#64748b" style={{ flexShrink: 0, marginTop: '2px' }} />
-          <span style={{ fontSize: '11px', fontWeight: 600, color: '#334155' }}>
-            Prototype Integrity
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', marginBottom: '4px' }}>
+          <Info size={13} color="#0284c7" style={{ flexShrink: 0, marginTop: '2px' }} />
+          <span style={{ fontSize: '10px', lineHeight: 1.3 }}>
+            <strong>Prototype Integrity:</strong> Calibrated synthetic telemetry. Requires mine-specific field validation prior to deployment.
           </span>
         </div>
-        <p style={{ fontSize: '10px', color: '#64748b', lineHeight: 1.4 }}>
-          Software-defined digital twin running calibrated synthetic telemetry. Requires geotechnical field validation prior to operational deployment.
-        </p>
-        <div style={{ marginTop: '8px', fontSize: '9px', fontFamily: 'var(--font-mono)', color: '#94a3b8' }}>
-          CORE: DETECT → CORRELATE → WARN
+        <div style={{ fontSize: '9px', color: '#94a3b8', fontFamily: 'var(--font-mono)' }}>
+          CORE: SENSE → CORRELATE → WARN
         </div>
       </div>
     </aside>

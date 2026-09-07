@@ -20,6 +20,8 @@ import { AddNodeModal } from './components/Common/AddNodeModal';
 import { ConfigureNodeModal } from './components/Common/ConfigureNodeModal';
 import { SimulatedAlertModals } from './components/Common/SimulatedAlertModals';
 import { LiveTelemetryModal } from './components/Common/LiveTelemetryModal';
+import { KeyboardShortcutsModal } from './components/Common/KeyboardShortcutsModal';
+import { DataSourceModal } from './components/Common/DataSourceModal';
 
 const AppShell: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavTab>('COMMAND_CENTER');
@@ -95,6 +97,8 @@ const AppShell: React.FC = () => {
       <ConfigureNodeModal />
       <SimulatedAlertModals />
       <LiveTelemetryModal />
+      <KeyboardShortcutsModal />
+      <DataSourceModal />
     </div>
   );
 };

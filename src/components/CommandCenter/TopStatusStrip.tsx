@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSimulation } from '../../state/simulationContext';
-import { AlertCircle, CheckCircle2, Cpu, Wifi, Clock } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Cpu, Wifi, Database, Info } from 'lucide-react';
 
 export const TopStatusStrip: React.FC = () => {
   const {
@@ -9,14 +9,11 @@ export const TopStatusStrip: React.FC = () => {
     consensusResult,
     nodes,
     networkHealth,
-    simClockSec,
-    eventLog
+    setActiveModal
   } = useSimulation();
 
   const totalMonitored = Object.values(nodes).filter(n => !n.isReference && n.status !== 'OFFLINE').length;
   const anomalousCount = Object.values(nodes).filter(n => n.status === 'ANOMALOUS' || n.status === 'CRITICAL').length;
-  const lastEvent = eventLog[0];
-  const secSinceLastEvent = lastEvent ? Math.max(1, simClockSec - lastEvent.simSecond) : 0;
 
   return (
     <div style={{
@@ -29,7 +26,7 @@ export const TopStatusStrip: React.FC = () => {
       <div className="card-industrial" style={{ padding: '10px 14px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
           <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>
-            Current Risk Index
+            Current Risk
           </span>
           <span className={`badge-status ${riskBand.toLowerCase()}`}>
             {riskBand}
@@ -52,8 +49,8 @@ export const TopStatusStrip: React.FC = () => {
           <span style={{
             fontSize: '10px',
             fontFamily: 'var(--font-mono)',
-            fontWeight: 600,
-            color: consensusResult.confidence === 'HIGH' ? '#b91c1c' : consensusResult.confidence === 'MODERATE' ? '#b45309' : '#15803d'
+            fontWeight: 700,
+            color: consensusResult.confidence === 'HIGH' ? '#15803d' : consensusResult.confidence === 'MODERATE' ? '#d97706' : '#64748b'
           }}>
             {consensusResult.confidence} CONF.
           </span>
@@ -104,7 +101,7 @@ export const TopStatusStrip: React.FC = () => {
           <span className="font-mono" style={{ fontSize: '24px', fontWeight: 700, color: '#0f172a' }}>
             {networkHealth}%
           </span>
-          <span style={{ fontSize: '11px', color: '#64748b' }}>delivery rate</span>
+          <span style={{ fontSize: '11px', color: '#64748b' }}>packet delivery</span>
         </div>
       </div>
 
@@ -117,28 +114,40 @@ export const TopStatusStrip: React.FC = () => {
           <Cpu size={14} color="#0284c7" />
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-          <span className="font-mono" style={{ fontSize: '19px', fontWeight: 700, color: '#0f172a' }}>
+          <span className="font-mono" style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a' }}>
             EDGE-01
           </span>
-          <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 600 }}>ONLINE</span>
+          <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 700 }}>ACTIVE</span>
         </div>
       </div>
 
-      {/* 6. Last Event Timeline */}
-      <div className="card-industrial" style={{ padding: '10px 14px' }}>
+      {/* 6. Data Source Disclosure Card (Req 154) */}
+      <div
+        onClick={() => setActiveModal('DATA_SOURCE')}
+        className="card-industrial"
+        style={{
+          padding: '10px 14px',
+          cursor: 'pointer',
+          border: '1px solid #bae6fd',
+          background: '#f0f9ff',
+          transition: 'all 0.15s ease'
+        }}
+        title="Click to inspect Data Layer Architecture and Field Sensor Adapter Contract"
+      >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-          <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>
-            Last Event
+          <span style={{ fontSize: '11px', fontWeight: 700, color: '#0369a1', textTransform: 'uppercase' }}>
+            Data Source
           </span>
-          <Clock size={14} color="#94a3b8" />
+          <Info size={13} color="#0284c7" />
         </div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-          <span className="font-mono" style={{ fontSize: '19px', fontWeight: 700, color: '#0f172a' }}>
-            {secSinceLastEvent}s ago
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Database size={15} color="#0284c7" />
+          <span style={{ fontSize: '12px', fontWeight: 700, color: '#0369a1', textTransform: 'uppercase' }}>
+            SYNTHETIC SIMULATION
           </span>
-          <span style={{ fontSize: '10px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {lastEvent ? lastEvent.type.replace('_', ' ') : 'None'}
-          </span>
+        </div>
+        <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>
+          Deterministic digital twin
         </div>
       </div>
     </div>
