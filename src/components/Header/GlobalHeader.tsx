@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSimulation } from '../../state/simulationContext';
-import { Activity, Radio, Cpu, Cloud, CloudOff, RefreshCw, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { Radio, Cpu, Cloud, CloudOff, RefreshCw, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 export const GlobalHeader: React.FC = () => {
   const {
@@ -32,18 +32,20 @@ export const GlobalHeader: React.FC = () => {
     }}>
       {/* Brand & Technical Subtitle */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div style={{
-          width: '32px',
-          height: '32px',
-          borderRadius: '6px',
-          background: '#0f172a',
-          color: '#ffffff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <Activity size={18} />
-        </div>
+        <img
+          src="/logo.png"
+          alt="BHUSTHIRA Logo"
+          style={{
+            width: '38px',
+            height: '38px',
+            borderRadius: '6px',
+            objectFit: 'contain',
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
+            padding: '2px',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+          }}
+        />
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '15px', fontWeight: 700, letterSpacing: '-0.02em', color: '#0f172a' }}>

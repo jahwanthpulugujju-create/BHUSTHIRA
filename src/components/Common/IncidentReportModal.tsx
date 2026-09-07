@@ -139,6 +139,20 @@ export const IncidentReportModal: React.FC = () => {
 
         {/* Scrollable Report Body */}
         <div style={{ padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Official Dossier Brand Header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '14px', borderBottom: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <img src="/logo.png" alt="BHUSTHIRA" style={{ width: '42px', height: '42px', borderRadius: '6px', objectFit: 'contain', border: '1px solid #e2e8f0', padding: '2px', background: '#ffffff' }} />
+              <div>
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>BHUSTHIRA</h3>
+                <div style={{ fontSize: '11px', color: '#64748b' }}>Real-Time Mine Subsidence Intelligence & Early Warning System</div>
+              </div>
+            </div>
+            <div style={{ textAlign: 'right', fontSize: '11px', color: '#64748b' }}>
+              <div><strong style={{ color: '#0f172a' }}>SIH26025</strong> Prototype Dossier</div>
+              <div>Generated: {new Date().toISOString().replace('T', ' ').substring(0, 19)} UTC</div>
+            </div>
+          </div>
           {/* Statutory Simulation Notice */}
           <div style={{
             padding: '10px 14px',
