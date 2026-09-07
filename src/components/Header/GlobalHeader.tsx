@@ -38,12 +38,7 @@ export const GlobalHeader: React.FC = () => {
           style={{
             width: '52px',
             height: '52px',
-            borderRadius: '8px',
-            objectFit: 'contain',
-            background: '#ffffff',
-            border: '1.5px solid #cbd5e1',
-            padding: '3px',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+            objectFit: 'contain'
           }}
         />
         <div>
