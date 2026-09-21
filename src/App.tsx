@@ -22,9 +22,13 @@ import { SimulatedAlertModals } from './components/Common/SimulatedAlertModals';
 import { LiveTelemetryModal } from './components/Common/LiveTelemetryModal';
 import { KeyboardShortcutsModal } from './components/Common/KeyboardShortcutsModal';
 import { DataSourceModal } from './components/Common/DataSourceModal';
+import { FieldTelemetryModal } from './components/Common/FieldTelemetryModal';
+import { EngineeringDiagnosticsModal } from './components/Common/EngineeringDiagnosticsModal';
+import { useSimulation } from './state/simulationContext';
 
 const AppShell: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavTab>('COMMAND_CENTER');
+  const { telemetryMode, fieldNodeId } = useSimulation();
 
   return (
     <div style={{
@@ -79,8 +83,16 @@ const AppShell: React.FC = () => {
             alignItems: 'center'
           }}>
             <div>
-              <strong>BHUSTHIRA</strong> • SIH26025 Prototype • 
-              <span style={{ marginLeft: '4px', color: '#0284c7', fontWeight: 600 }}>Simulation Mode • Synthetic Sensor Telemetry</span>
+              <strong>STRATUM</strong> • SIH26025 Prototype • 
+              {telemetryMode === 'LIVE' ? (
+                <span style={{ marginLeft: '4px', color: '#16a34a', fontWeight: 700 }}>
+                  FIELD TELEMETRY — LINKED • NODE {fieldNodeId || 'N01'} LIVE • Physical Sensor Ingestion Active
+                </span>
+              ) : (
+                <span style={{ marginLeft: '4px', color: '#0284c7', fontWeight: 600 }}>
+                  Simulation Mode • Synthetic Sensor Telemetry
+                </span>
+              )}
             </div>
             <div>
               Prototype Scope: Calibrated heuristic digital twin. Requires mine-specific geotechnical calibration prior to field deployment.
@@ -99,6 +111,8 @@ const AppShell: React.FC = () => {
       <LiveTelemetryModal />
       <KeyboardShortcutsModal />
       <DataSourceModal />
+      <FieldTelemetryModal />
+      <EngineeringDiagnosticsModal />
     </div>
   );
 };

@@ -33,7 +33,7 @@ export interface RiskModelConfig {
 
 export const RISK_MODEL_CONFIG: RiskModelConfig = {
   version: '2.1.0-prototype',
-  name: 'BHUSTHIRA Kinematic Consensus Model (Prototype)',
+  name: 'STRATUM Kinematic Consensus Model (Prototype)',
   disclaimer: 'Prototype risk model. Demonstration parameters only. Requires mine-specific geotechnical calibration before field deployment.',
   weights: {
     displacement: 0.35,

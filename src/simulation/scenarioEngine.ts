@@ -16,7 +16,7 @@ export interface ScenarioStepState {
 }
 
 /**
- * Pure, deterministic scenario state evaluator for BHUSTHIRA.
+ * Pure, deterministic scenario state evaluator for STRATUM.
  * Given a scenario and exact simulation second, computes the exact reproducible system state.
  * Used for live tick advances, Skip-to-Warning, Skip-to-Critical, and Incident Replay.
  */
@@ -32,7 +32,7 @@ export function getScenarioStateAtTime(
     nodeManualFailId?: string | null;
   }
 ): ScenarioStepState {
-  const seed = options?.seed || 'BHUSTHIRA-SIH26025';
+  const seed = options?.seed || 'STRATUM-SIH26025';
   const updatedNodes: Record<string, SensorNode> = {};
   const updatedPanels: Record<string, MinePanel> = {};
   let updatedLinks: MeshLink[] = baseLinks.map(l => ({ ...l }));

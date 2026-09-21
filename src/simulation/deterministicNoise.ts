@@ -1,5 +1,5 @@
 /**
- * Deterministic, Seeded Pseudo-Noise Engine for BHUSTHIRA Synthetic Telemetry.
+ * Deterministic, Seeded Pseudo-Noise Engine for STRATUM Synthetic Telemetry.
  * Ensures that for any given (seed, tick, nodeId), the generated measurement
  * is 100% deterministic and reproducible across live runs, guided demos, and replays.
  */

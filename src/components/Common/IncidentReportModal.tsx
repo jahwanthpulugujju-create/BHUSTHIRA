@@ -18,7 +18,7 @@ export const IncidentReportModal: React.FC = () => {
   const handleDownloadJSON = () => {
     const reportData = {
       incidentId,
-      system: 'BHUSTHIRA',
+      system: 'STRATUM',
       disclaimer: 'SIMULATION GENERATED INCIDENT REPORT - NOT AN OFFICIAL DGMS CERTIFICATE',
       generatedAt: generatedTime,
       scenario: currentScenario,
@@ -98,7 +98,7 @@ export const IncidentReportModal: React.FC = () => {
                 Incident Dossier: {incidentId}
               </h2>
               <div style={{ fontSize: '11px', color: '#64748b' }}>
-                Automated Incident Audit • BHUSTHIRA Simulation Architecture
+                Automated Incident Audit • STRATUM Simulation Architecture
               </div>
             </div>
           </div>
@@ -141,9 +141,9 @@ export const IncidentReportModal: React.FC = () => {
           {/* Official Dossier Brand Header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '14px', borderBottom: '1px solid #e2e8f0' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <img src="/logo.png" alt="BHUSTHIRA" style={{ width: '42px', height: '42px', borderRadius: '6px', objectFit: 'contain', border: '1px solid #e2e8f0', padding: '2px', background: '#ffffff' }} />
+              <img src="/logo.png" alt="STRATUM" style={{ width: '42px', height: '42px', borderRadius: '6px', objectFit: 'contain', border: '1px solid #e2e8f0', padding: '2px', background: '#ffffff' }} />
               <div>
-                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>BHUSTHIRA</h3>
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>STRATUM</h3>
                 <div style={{ fontSize: '11px', color: '#64748b' }}>Real-Time Mine Subsidence Intelligence & Early Warning System</div>
               </div>
             </div>

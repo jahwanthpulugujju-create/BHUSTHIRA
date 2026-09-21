@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSimulation } from '../../state/simulationContext';
-import { AlertCircle, CheckCircle2, Cpu, Wifi, Database, Info } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Cpu, Wifi, Database } from 'lucide-react';
 
 export const TopStatusStrip: React.FC = () => {
   const {
@@ -9,7 +9,9 @@ export const TopStatusStrip: React.FC = () => {
     consensusResult,
     nodes,
     networkHealth,
-    setActiveModal
+    setActiveModal,
+    telemetryMode,
+    fieldPacketCount
   } = useSimulation();
 
   const totalMonitored = Object.values(nodes).filter(n => !n.isReference && n.status !== 'OFFLINE').length;
@@ -121,33 +123,42 @@ export const TopStatusStrip: React.FC = () => {
         </div>
       </div>
 
-      {/* 6. Data Source Disclosure Card (Req 154) */}
+      {/* 6. Field Telemetry Architecture Card */}
       <div
-        onClick={() => setActiveModal('DATA_SOURCE')}
+        onClick={() => setActiveModal('FIELD_TELEMETRY')}
         className="card-industrial"
         style={{
           padding: '10px 14px',
           cursor: 'pointer',
-          border: '1px solid #bae6fd',
-          background: '#f0f9ff',
+          border: `1px solid ${telemetryMode === 'LIVE' ? '#86efac' : '#bae6fd'}`,
+          background: telemetryMode === 'LIVE' ? '#f0fdf4' : '#f0f9ff',
           transition: 'all 0.15s ease'
         }}
-        title="Click to inspect Data Layer Architecture and Field Sensor Adapter Contract"
+        title="Click to inspect Field Telemetry Adapter, Bench Ingestion, and Architecture Pipeline"
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-          <span style={{ fontSize: '11px', fontWeight: 700, color: '#0369a1', textTransform: 'uppercase' }}>
-            Data Source
+          <span style={{ fontSize: '11px', fontWeight: 700, color: telemetryMode === 'LIVE' ? '#166534' : '#0369a1', textTransform: 'uppercase' }}>
+            Field Telemetry
           </span>
-          <Info size={13} color="#0284c7" />
+          <span style={{
+            fontSize: '9px',
+            fontWeight: 800,
+            padding: '2px 6px',
+            borderRadius: '3px',
+            backgroundColor: telemetryMode === 'LIVE' ? '#16a34a' : '#0284c7',
+            color: '#ffffff'
+          }}>
+            {telemetryMode === 'LIVE' ? 'LIVE' : 'SIMULATION'}
+          </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Database size={15} color="#0284c7" />
-          <span style={{ fontSize: '12px', fontWeight: 700, color: '#0369a1', textTransform: 'uppercase' }}>
-            SYNTHETIC SIMULATION
+          <Database size={15} color={telemetryMode === 'LIVE' ? '#16a34a' : '#0284c7'} />
+          <span style={{ fontSize: '12px', fontWeight: 700, color: telemetryMode === 'LIVE' ? '#15803d' : '#0369a1', textTransform: 'uppercase' }}>
+            {telemetryMode === 'LIVE' ? 'NODE N01 • LINKED' : 'PHYSICS TWIN'}
           </span>
         </div>
         <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>
-          Deterministic digital twin
+          {telemetryMode === 'LIVE' ? `${fieldPacketCount} packets received` : 'Deterministic baseline'}
         </div>
       </div>
     </div>

@@ -57,7 +57,7 @@ export const DeformationIntelligencePage: React.FC = () => {
       <div className="card-industrial" style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-            BHUSTHIRA Deformation Intelligence Engine
+            STRATUM Deformation Intelligence Engine
           </h2>
           <p style={{ fontSize: '11px', color: '#64748b', margin: '3px 0 0 0' }}>
             Multi-stage evidence fusion pipeline transforming distributed physical telemetry into transparent, explainable early warning.
@@ -73,7 +73,7 @@ export const DeformationIntelligencePage: React.FC = () => {
       {/* Core Architectural Differentiator (Req 99) */}
       <div className="card-industrial" style={{ padding: '16px', background: '#ffffff' }}>
         <div style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', marginBottom: '12px' }}>
-          Architectural Contrast: Naive Thresholds vs BHUSTHIRA Intelligence
+          Architectural Contrast: Naive Thresholds vs STRATUM Intelligence
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
@@ -108,7 +108,7 @@ export const DeformationIntelligencePage: React.FC = () => {
             </p>
           </div>
 
-          {/* BHUSTHIRA Multi-Tier Model */}
+          {/* STRATUM Multi-Tier Model */}
           <div style={{
             background: '#f0fdf4',
             border: '1px solid #bbf7d0',
@@ -116,7 +116,7 @@ export const DeformationIntelligencePage: React.FC = () => {
             padding: '12px 14px'
           }}>
             <div style={{ fontSize: '11px', fontWeight: 700, color: '#166534', textTransform: 'uppercase', marginBottom: '6px' }}>
-              BHUSTHIRA Corroborative Intelligence (Zero Blind Alarms)
+              STRATUM Corroborative Intelligence (Zero Blind Alarms)
             </div>
             <div style={{
               display: 'flex',

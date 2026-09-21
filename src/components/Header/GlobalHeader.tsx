@@ -12,7 +12,10 @@ export const GlobalHeader: React.FC = () => {
     toggleCloudConnection,
     simClockSec,
     currentScenario,
-    isRunning
+    isRunning,
+    telemetryMode,
+    fieldNodeId,
+    setActiveModal
   } = useSimulation();
 
   const { istTime } = useSystemClock();
@@ -34,7 +37,7 @@ export const GlobalHeader: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <img
           src="/logo-emblem.png"
-          alt="BHUSTHIRA Emblem"
+          alt="STRATUM Emblem"
           style={{
             width: '42px',
             height: '42px',
@@ -44,7 +47,7 @@ export const GlobalHeader: React.FC = () => {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '17px', fontWeight: 800, letterSpacing: '-0.02em', color: '#09332c' }}>
-              BHUSTHIRA
+              STRATUM
             </span>
             <span style={{
               fontSize: '11px',
@@ -111,15 +114,66 @@ export const GlobalHeader: React.FC = () => {
 
       {/* 3. Right: Edge-01, Cloud Islanding, System Band */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        {/* Synthetic Simulation Mode Tag */}
-        <div
-          className="sim-tag"
-          title="Synthetic sensor telemetry — software-defined digital twin calibrated against baseline"
-          style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
-        >
-          <Radio size={12} color="#d97706" />
-          <span>SIMULATION MODE</span>
-        </div>
+        {/* Telemetry Ingestion Mode Indicator (Simulation vs Physical Field Link) */}
+        {telemetryMode === 'LIVE' ? (
+          <button
+            onClick={() => setActiveModal('FIELD_TELEMETRY')}
+            title="Field Telemetry Link Active • Click to manage hardware connection"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '7px',
+              fontSize: '11px',
+              fontWeight: 800,
+              background: '#09332c',
+              color: '#34d399',
+              border: '1px solid #059669',
+              padding: '4px 10px',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              letterSpacing: '0.02em'
+            }}
+          >
+            <span style={{ 
+              width: '7px', 
+              height: '7px', 
+              borderRadius: '50%', 
+              backgroundColor: '#34d399', 
+              boxShadow: '0 0 8px #34d399' 
+            }} />
+            <span>FIELD TELEMETRY — LINKED</span>
+            <span style={{ color: '#ffffff', opacity: 0.6 }}>•</span>
+            <span style={{ color: '#ffffff' }}>NODE {fieldNodeId || 'N01'} • LIVE</span>
+          </button>
+        ) : (
+          <button
+            onClick={() => setActiveModal('FIELD_TELEMETRY')}
+            className="sim-tag"
+            title="Synthetic sensor telemetry — software-defined digital twin calibrated against baseline. Click to link physical field sensor."
+            style={{ 
+              fontSize: '11px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '6px', 
+              cursor: 'pointer',
+              border: '1px solid #fde68a'
+            }}
+          >
+            <Radio size={12} color="#d97706" />
+            <span>SIMULATION MODE</span>
+            <span style={{ 
+              fontSize: '9px', 
+              color: '#b45309', 
+              fontWeight: 800, 
+              background: '#fef3c7', 
+              padding: '1px 5px', 
+              borderRadius: '3px',
+              border: '1px solid #fde68a'
+            }}>
+              LINK NODE
+            </span>
+          </button>
+        )}
 
         {/* On-Site Edge Node Status */}
         <div style={{

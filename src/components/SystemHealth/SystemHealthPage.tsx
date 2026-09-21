@@ -31,7 +31,7 @@ const INTEGRATIONS_CATALOG: IntegrationDetail[] = [
     protocol: 'Local IPC / Socket.io emulation',
     latency: '< 15 ms',
     description: 'Autonomous edge processing daemon deployed on industrial Raspberry Pi CM4 / x86 edge computer.',
-    fieldIntegrationNotes: 'Direct serial/UART/SPI connection to local multi-channel LoRa concentrator module.'
+    fieldIntegrationNotes: 'Direct serial/UART/SPI connection to local multi-channel field telemetry concentrator module.'
   },
   {
     name: 'GIS Spatial Projection',
@@ -49,15 +49,15 @@ const INTEGRATIONS_CATALOG: IntegrationDetail[] = [
     protocol: 'MQTT 3.1.1 / TLS 1.3 (Port 8883)',
     latency: 'Sub-50 ms over 4G/Local Ethernet',
     description: 'Pub/Sub telemetry broker designed to accept payload streams from low-power ESP32 microcontrollers.',
-    fieldIntegrationNotes: 'Standardized topic schema `mine/bhusthira/telemetry/{node_id}` ready to bind in production settings.'
+    fieldIntegrationNotes: 'Standardized topic schema `mine/stratum/telemetry/{node_id}` ready to bind in production settings.'
   },
   {
-    name: 'LoRaWAN Concentrator Interface',
-    category: 'Wireless Mesh',
+    name: 'Field Telemetry Concentrator Interface',
+    category: 'Field Telemetry Mesh',
     status: 'READY',
-    protocol: 'Semtech SX1302 868/915 MHz Packet Forwarder',
-    latency: '500 - 1500 ms depending on SF7-SF12',
-    description: 'Sub-GHz RF physical layer abstraction for deep underground / rugged surface coal mine terrain.',
+    protocol: 'Sub-GHz Industrial RF Packet Forwarder',
+    latency: '500 - 1500 ms depending on modulation mode',
+    description: 'Sub-GHz physical RF layer abstraction for deep underground / rugged surface coal mine terrain.',
     fieldIntegrationNotes: 'Requires DGMS/PESO intrinsically safe certified flame-proof enclosure in underground headings.'
   },
   {
@@ -304,7 +304,7 @@ export const SystemHealthPage: React.FC = () => {
 
         <p style={{ margin: '0 0 14px 0', fontSize: '13px', color: '#334155', lineHeight: '1.5' }}>
           A common failure mode in simplistic monitoring systems is confusing <strong>sensor failure</strong> with 
-          <strong> ground subsidence</strong>. In BHUSTHIRA, <em>Hardware Sensor Health</em> (is the instrument functional?) is strictly decoupled 
+          <strong> ground subsidence</strong>. In STRATUM, <em>Hardware Sensor Health</em> (is the instrument functional?) is strictly decoupled 
           from <em>Environmental Deformation Signal</em> (is the ground behaving abnormally?). If a sensor has degraded health, its reading confidence is lowered 
           rather than triggering a false catastrophic mine evacuation.
         </p>

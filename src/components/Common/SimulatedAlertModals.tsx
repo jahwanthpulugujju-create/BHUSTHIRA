@@ -32,7 +32,7 @@ export const SimulatedAlertModals: React.FC = () => {
         }}>
           {/* Phone Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#94a3b8', fontSize: '11px', marginBottom: '16px', padding: '0 8px' }}>
-            <span>BHUSTHIRA-SMS GATEWAY</span>
+            <span>STRATUM-SMS GATEWAY</span>
             <button
               onClick={() => setActiveModal('NONE')}
               style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
@@ -46,7 +46,7 @@ export const SimulatedAlertModals: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
               <ShieldAlert size={16} color="#dc2626" />
               <span style={{ fontSize: '12px', fontWeight: 800, color: '#dc2626', letterSpacing: '0.05em' }}>
-                BHUSTHIRA EARLY WARNING
+                STRATUM EARLY WARNING
               </span>
             </div>
 
@@ -62,7 +62,7 @@ export const SimulatedAlertModals: React.FC = () => {
             </div>
 
             <div style={{ fontSize: '10px', color: '#64748b', borderTop: '1px solid #e2e8f0', paddingTop: '6px' }}>
-              BHUSTHIRA EDGE-01 • Automated Dispatch Protocol
+              STRATUM EDGE-01 • Automated Dispatch Protocol
             </div>
           </div>
 
@@ -117,7 +117,7 @@ export const SimulatedAlertModals: React.FC = () => {
           {/* Email Content */}
           <div style={{ padding: '20px', fontSize: '13px', color: '#334155', display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '8px', fontSize: '12px' }}>
-              <div><strong>From:</strong> bhusthira-edge01@mine-safety.internal</div>
+              <div><strong>From:</strong> stratum-edge01@mine-safety.internal</div>
               <div><strong>To:</strong> shift.supervisor@coalfields.in, dgms.monitoring@gov.in</div>
               <div><strong>Subject:</strong> [URGENT-EARLY-WARNING] Subsidence Consensus Alert: Panel B (Risk: {riskResult.riskScore}/100)</div>
             </div>
@@ -127,7 +127,7 @@ export const SimulatedAlertModals: React.FC = () => {
                 <strong>Attention Shift Supervisor & Mine Safety Officer,</strong>
               </p>
               <p style={{ margin: '0 0 8px 0' }}>
-                The automated BHUSTHIRA intelligence pipeline at Gateway EDGE-01 has detected statistically significant 
+                The automated STRATUM intelligence pipeline at Gateway EDGE-01 has detected statistically significant 
                 strata deformation exceeding operational safety bands in <strong>Panel B (Seam XI/XII Longwall Overburden)</strong>.
               </p>
               <div style={{ backgroundColor: '#f8fafc', padding: '10px 14px', borderRadius: '4px', border: '1px solid #e2e8f0', margin: '8px 0' }}>

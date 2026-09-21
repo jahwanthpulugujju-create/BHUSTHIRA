@@ -64,7 +64,7 @@ export const EvidenceDrawer: React.FC = () => {
                 Why am I seeing this alert?
               </h2>
               <div style={{ fontSize: '12px', color: '#64748b' }}>
-                Explainable Evidence Dossier • BHUSTHIRA Intelligence Engine
+                Explainable Evidence Dossier • STRATUM Intelligence Engine
               </div>
             </div>
           </div>
@@ -276,7 +276,7 @@ export const EvidenceDrawer: React.FC = () => {
           alignItems: 'center'
         }}>
           <span style={{ fontSize: '11px', color: '#64748b' }}>
-            BHUSTHIRA Decision Support Engine
+            STRATUM Decision Support Engine
           </span>
           <button
             className="btn btn-primary"

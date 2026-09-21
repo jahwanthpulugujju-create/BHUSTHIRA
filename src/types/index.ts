@@ -77,6 +77,20 @@ export type ScenarioType =
   | 'RECOVERY'
   | 'FULL_DEMO';
 
+export type ActiveModalType = 
+  | 'NONE'
+  | 'EVIDENCE'
+  | 'INCIDENT_REPORT'
+  | 'ADD_NODE'
+  | 'CONFIG_NODE'
+  | 'LIVE_TELEMETRY'
+  | 'FIELD_TELEMETRY'
+  | 'ENGINEERING_DIAGNOSTICS'
+  | 'MOBILE_SMS'
+  | 'EMAIL_ALERT'
+  | 'SHORTCUTS'
+  | 'DATA_SOURCE';
+
 export interface AlertEvidenceItem {
   category: 'Tilt' | 'Displacement' | 'Vibration' | 'Crack Detection' | 'Spatial Correlation' | 'Multi-Sensor Agreement' | 'Sensor Health' | 'Temporal Persistence';
   finding: string;

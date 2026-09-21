@@ -101,7 +101,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, onSelectTab }
         }}>
           <img
             src="/logo-full.png"
-            alt="BHUSTHIRA — Stable Mines, Safer Tomorrows"
+            alt="STRATUM — Stable Mines, Safer Tomorrows"
             style={{
               width: '100%',
               maxWidth: '150px',

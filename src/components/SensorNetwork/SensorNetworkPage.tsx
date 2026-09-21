@@ -10,7 +10,8 @@ export const SensorNetworkPage: React.FC = () => {
     toggleNodeFailure,
     toggleCloudConnection,
     selectNode,
-    networkHealth
+    networkHealth,
+    telemetryMode
   } = useSimulation();
 
   const isN04Offline = nodes['N04']?.status === 'OFFLINE';
@@ -28,16 +29,22 @@ export const SensorNetworkPage: React.FC = () => {
       <div className="card-industrial" style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-            BHUSTHIRA Sensor Network & Mesh Topology
+            STRATUM Sensor Network & Mesh Topology
           </h2>
           <p style={{ fontSize: '11px', color: '#64748b', margin: '3px 0 0 0' }}>
             Underground Sub-GHz wireless mesh telemetry, multi-hop route recovery, and edge-first islanding resilience.
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span className="sim-tag">
-            SIMULATED 868MHz MESH TOPOLOGY
-          </span>
+          {telemetryMode === 'LIVE' ? (
+            <span style={{ background: '#16a34a', color: '#ffffff', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>
+              FIELD TELEMETRY — DIRECT EDGE LINK (NODE N01 LIVE)
+            </span>
+          ) : (
+            <span className="sim-tag">
+              SIMULATED 868MHz MESH TOPOLOGY
+            </span>
+          )}
         </div>
       </div>
 
@@ -103,6 +110,36 @@ export const SensorNetworkPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {telemetryMode === 'LIVE' && (
+        <div style={{
+          padding: '12px 16px',
+          background: '#f0fdf4',
+          border: '1px solid #86efac',
+          borderRadius: '6px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          <div>
+            <div style={{ fontSize: '11px', fontWeight: 800, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Bench Hardware Connection Topology
+            </div>
+            <div style={{ fontSize: '12px', color: '#15803d', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-mono)' }}>
+              <strong>FIELD NODE (N01)</strong>
+              <span>&rarr;</span>
+              <span style={{ background: '#dcfce7', padding: '2px 8px', borderRadius: '3px', border: '1px solid #bbf7d0' }}>DIRECT EDGE LINK</span>
+              <span>&rarr;</span>
+              <strong>STRATUM WORKSTATION [CONNECTED]</strong>
+            </div>
+          </div>
+          <div style={{ fontSize: '11px', color: '#475569', maxWidth: '440px', lineHeight: 1.4 }}>
+            Direct point-to-point bench telemetry active. Multi-hop mesh routing is an active feature of the production Sub-GHz LoRa mesh architecture; bench hardware connects directly without claiming multi-hop mesh.
+          </div>
+        </div>
+      )}
 
       {/* Interactive Topology Graph (Req 39 & 40) */}
       <div className="card-industrial" style={{ padding: '16px', background: '#ffffff' }}>

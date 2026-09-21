@@ -45,9 +45,9 @@ export const DeploymentArchitecturePage: React.FC = () => {
     {
       domain: 'Sensor Telemetry',
       currentStage: 'Synthetic Sensor Telemetry Engine',
-      futureStage: 'Intrinsically Safe (IS) LoRa Mesh Nodes (ESP32-S3 + Semtech SX1262)',
+      futureStage: 'Intrinsically Safe (IS) Field Telemetry Array (ESP32-S3 Industrial Nodes)',
       status: 'PROTOTYPE SIMULATION',
-      detail: 'Software deterministic telemetry will be replaced by packet decoders subscribing to standard MQTT field broker topics.'
+      detail: 'Software deterministic telemetry is ingested via TelemetryAdapter, ready for physical bench link or gateway subscription.'
     },
     {
       domain: 'Mine Geometry',
@@ -76,19 +76,19 @@ export const DeploymentArchitecturePage: React.FC = () => {
     {
       item: 'Surface Monitoring Cluster (6 Nodes)',
       conventionalCost: '₹ 25,00,000 - 45,00,000 (Imported Total Stations / InSAR contracts)',
-      bhusthiraProposedCost: '₹ 1,80,000 - 2,50,000 (Low-Cost Distributed MEMS Mesh)',
+      stratumProposedCost: '₹ 1,80,000 - 2,50,000 (Low-Cost Distributed MEMS Mesh)',
       savings: '85 - 90% Capital Expenditure Reduction'
     },
     {
       item: 'Sampling Frequency & Latency',
       conventionalCost: 'Weekly / Bi-weekly manual levelling; 12-day InSAR satellite revisit',
-      bhusthiraProposedCost: 'Real-time (5-second edge polling; instant event triggered bursts)',
+      stratumProposedCost: 'Real-time (5-second edge polling; instant event triggered bursts)',
       savings: 'Continuous early warning vs retrospective damage survey'
     },
     {
       item: 'Underground / Surface Power Resilience',
       conventionalCost: 'Heavy lead-acid stations requiring frequent technician battery swaps',
-      bhusthiraProposedCost: 'Ultra-low power sleep states + 10W monocrystalline solar harvesting (5+ yr lifecycle)',
+      stratumProposedCost: 'Ultra-low power sleep states + 10W monocrystalline solar harvesting (5+ yr lifecycle)',
       savings: 'Zero operational downtime in remote Indian coalfields'
     }
   ];
@@ -142,6 +142,29 @@ export const DeploymentArchitecturePage: React.FC = () => {
           <span className="badge badge-normal">ZERO-CLOUD-DEPENDENCY DECISION SUPPORT</span>
         </div>
 
+        {/* 8-Stage Architecture Pipeline Stream */}
+        <div style={{
+          backgroundColor: '#f1f5f9',
+          border: '1px solid #cbd5e1',
+          borderRadius: '6px',
+          padding: '12px 16px',
+          marginBottom: '20px'
+        }}>
+          <div style={{ fontSize: '11px', fontWeight: 800, color: '#09332c', textTransform: 'uppercase', marginBottom: '6px' }}>
+            FIELD TELEMETRY PROCESSING ARCHITECTURE
+          </div>
+          <div style={{
+            fontSize: '11px',
+            fontFamily: 'var(--font-mono)',
+            fontWeight: 700,
+            color: '#0f172a',
+            overflowX: 'auto',
+            whiteSpace: 'nowrap'
+          }}>
+            PHYSICAL SENSOR <span style={{ color: '#09332c' }}>↓</span> TELEMETRY ADAPTER <span style={{ color: '#09332c' }}>↓</span> NORMALIZED STRATUM TELEMETRY <span style={{ color: '#09332c' }}>↓</span> ANOMALY DETECTION <span style={{ color: '#09332c' }}>↓</span> TEMPORAL ANALYSIS <span style={{ color: '#09332c' }}>↓</span> SPATIAL CORRELATION <span style={{ color: '#09332c' }}>↓</span> MULTI-SENSOR CONSENSUS <span style={{ color: '#09332c' }}>↓</span> RISK ENGINE <span style={{ color: '#09332c' }}>↓</span> GIS + ALERT
+          </div>
+        </div>
+
         {/* Visual Architecture Flow Diagram */}
         <div style={{ 
           display: 'grid', 
@@ -177,10 +200,10 @@ export const DeploymentArchitecturePage: React.FC = () => {
               <span style={{ fontSize: '11px', fontWeight: 700, color: '#475569' }}>LAYER 2</span>
             </div>
             <div style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', marginBottom: '6px' }}>
-              Sub-GHz RF Mesh
+              Field Telemetry Mesh
             </div>
             <div style={{ fontSize: '12px', color: '#64748b', lineHeight: '1.4', flex: 1 }}>
-              Self-healing multi-hop 868 MHz LoRa mesh. Resilient against line-of-sight obstruction in rugged overburden dumps.
+              Self-healing multi-hop field telemetry mesh. Resilient against line-of-sight obstruction in rugged overburden dumps.
             </div>
             <div style={{ marginTop: '12px', paddingTop: '8px', borderTop: '1px solid #e2e8f0', fontSize: '11px', color: '#10b981', fontWeight: 600 }}>
               &gt; 2.5 km Line-of-Sight Range
@@ -199,7 +222,7 @@ export const DeploymentArchitecturePage: React.FC = () => {
               Edge Gateway (EDGE-01)
             </div>
             <div style={{ fontSize: '12px', color: '#334155', lineHeight: '1.4', flex: 1 }}>
-              On-site industrial edge computer hosting BHUSTHIRA engine: Baseline normalization, spatial consensus, and risk classification.
+              On-site industrial edge computer hosting STRATUM engine: Baseline normalization, spatial consensus, and risk classification.
             </div>
             <div style={{ marginTop: '12px', paddingTop: '8px', borderTop: '1px solid #bfdbfe', fontSize: '11px', color: '#0369a1', fontWeight: 700 }}>
               Autonomous Local Decision Island
@@ -347,9 +370,9 @@ export const DeploymentArchitecturePage: React.FC = () => {
               <div style={{ fontSize: '12px', color: '#b91c1c', fontWeight: 600, marginBottom: '8px' }}>
                 {cost.conventionalCost}
               </div>
-              <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '4px' }}>BHUSTHIRA Proposed:</div>
+              <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '4px' }}>STRATUM Proposed:</div>
               <div style={{ fontSize: '12px', color: '#15803d', fontWeight: 700, marginBottom: '8px' }}>
-                {cost.bhusthiraProposedCost}
+                {cost.stratumProposedCost}
               </div>
               <div style={{ backgroundColor: '#dcfce7', color: '#166534', padding: '6px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>
                 {cost.savings}
@@ -376,7 +399,7 @@ export const DeploymentArchitecturePage: React.FC = () => {
         <div>
           <strong>Statutory Compliance & Field Calibration Notice:</strong>
           <p style={{ margin: '4px 0 0 0' }}>
-            BHUSTHIRA is a software-defined digital twin demonstration developed for SIH26025. 
+            STRATUM is a software-defined digital twin demonstration developed for SIH26025. 
             All measurements, scores, and topology graphs presented in this release are <strong>synthetic simulation artifacts</strong>. 
             Physical deployment in actual underground coal mines requires strict compliance with the Directorate General of Mines Safety (DGMS) regulations, 
             Intrinsically Safe (IS) equipment certification under PESO/CIMFR standards, and mine-specific geomechanical calibration before any life-critical operational use.

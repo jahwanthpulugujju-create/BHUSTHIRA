@@ -12,7 +12,7 @@ export const MineMapPage: React.FC = () => {
       <div className="card-industrial" style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>
-            BHUSTHIRA Deformation Map
+            STRATUM Deformation Map
           </h2>
           <p style={{ fontSize: '11px', color: '#64748b' }}>
             Geotechnical GIS, subterranean panel layout, longwall retreat faces, and dynamic subsidence influence footprints.

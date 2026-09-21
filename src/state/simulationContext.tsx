@@ -8,8 +8,11 @@ import type {
   IncidentEvent,
   RiskBreakdown,
   TelemetrySnapshot,
-  MeshLink
+  MeshLink,
+  ActiveModalType
 } from '../types';
+import type { NormalizedTelemetry, TelemetrySource, TelemetryConnectionState, OperatingMode } from '../telemetry/types';
+import { telemetryRegistry } from '../telemetry/telemetryRegistry';
 import { INITIAL_NODES, INITIAL_PANELS, INITIAL_LINKS } from '../simulation/mineModel';
 import { getScenarioStateAtTime } from '../simulation/scenarioEngine';
 import { calculateNodeAnomaly } from '../intelligence/anomalyDetection';
@@ -55,7 +58,20 @@ export interface SimulationContextType {
   // Interactivity
   selectedNodeId: string | null;
   selectedPanelId: string | null;
-  activeModal: 'NONE' | 'EVIDENCE' | 'INCIDENT_REPORT' | 'ADD_NODE' | 'CONFIG_NODE' | 'LIVE_TELEMETRY' | 'MOBILE_SMS' | 'EMAIL_ALERT' | 'SHORTCUTS' | 'DATA_SOURCE';
+  activeModal: ActiveModalType;
+
+  // Field Telemetry & Transport Layer
+  telemetryMode: OperatingMode;
+  telemetrySource: TelemetrySource;
+  fieldTelemetryStatus: TelemetryConnectionState;
+  fieldNodeId: string;
+  fieldPacketCount: number;
+  fieldPacketRateHz: number;
+  lastFieldPacket: NormalizedTelemetry | null;
+  fieldStatusMessage: string;
+  connectFieldNode: () => Promise<boolean>;
+  disconnectFieldNode: () => Promise<void>;
+  injectBenchTelemetry: (telemetry: Partial<NormalizedTelemetry>) => void;
   
   // Actions
   startSimulation: () => void;
@@ -71,7 +87,7 @@ export interface SimulationContextType {
   togglePresentationMode: () => void;
   selectNode: (nodeId: string | null) => void;
   selectPanel: (panelId: string | null) => void;
-  setActiveModal: (modal: 'NONE' | 'EVIDENCE' | 'INCIDENT_REPORT' | 'ADD_NODE' | 'CONFIG_NODE' | 'LIVE_TELEMETRY' | 'MOBILE_SMS' | 'EMAIL_ALERT' | 'SHORTCUTS' | 'DATA_SOURCE') => void;
+  setActiveModal: (modal: ActiveModalType) => void;
   toggleNodeFailure: (nodeId: string) => void;
   toggleCloudConnection: () => void;
   skipToWarning: () => void;
@@ -107,7 +123,17 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedPanelId, setSelectedPanelId] = useState<string | null>('Panel B');
-  const [activeModal, setActiveModal] = useState<'NONE' | 'EVIDENCE' | 'INCIDENT_REPORT' | 'ADD_NODE' | 'CONFIG_NODE' | 'LIVE_TELEMETRY' | 'MOBILE_SMS' | 'EMAIL_ALERT' | 'SHORTCUTS' | 'DATA_SOURCE'>('NONE');
+  const [activeModal, setActiveModal] = useState<ActiveModalType>('NONE');
+
+  // Field Telemetry & Transport State
+  const [telemetryMode, setTelemetryMode] = useState<OperatingMode>('SIMULATION');
+  const [telemetrySource, setTelemetrySource] = useState<TelemetrySource>('SIMULATION');
+  const [fieldTelemetryStatus, setFieldTelemetryStatus] = useState<TelemetryConnectionState>('DISCONNECTED');
+  const [fieldNodeId] = useState<string>('N01');
+  const [fieldPacketCount, setFieldPacketCount] = useState<number>(0);
+  const [fieldPacketRateHz, setFieldPacketRateHz] = useState<number>(0);
+  const [lastFieldPacket, setLastFieldPacket] = useState<NormalizedTelemetry | null>(null);
+  const [fieldStatusMessage, setFieldStatusMessage] = useState<string>('Simulation Mode Active');
   
   const [alertHistory, setAlertHistory] = useState<SystemAlert[]>([]);
   const [eventLog, setEventLog] = useState<IncidentEvent[]>([
@@ -117,7 +143,7 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       simSecond: 0,
       type: 'SYSTEM_BOOT',
       severity: 'INFO',
-      description: 'BHUSTHIRA edge intelligence online. 6 virtual sensors calibrated against baseline equilibrium.'
+      description: 'STRATUM edge intelligence online. 6 virtual sensors calibrated against baseline equilibrium.'
     }
   ]);
   
@@ -176,6 +202,88 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [riskResult.activeAlert]);
 
+  // Subscribe to physical/bench field telemetry stream
+  useEffect(() => {
+    const unsubData = telemetryRegistry.subscribeTelemetry((packet: NormalizedTelemetry) => {
+      setLastFieldPacket(packet);
+      const diags = telemetryRegistry.getDiagnostics();
+      setFieldPacketCount(diags.packetCount);
+      setFieldPacketRateHz(diags.packetRateHz);
+      
+      const targetId = packet.node_id || fieldNodeId || 'N01';
+      
+      setNodes(prev => {
+        const existing = prev[targetId];
+        if (!existing) return prev;
+        
+        const historyTilt = [...(existing.history?.tilt || []).slice(1), packet.tilt];
+        const historyDisp = [...(existing.history?.displacement || []).slice(1), packet.displacement];
+        const historyVib = [...(existing.history?.vibration || []).slice(1), packet.vibration];
+        
+        return {
+          ...prev,
+          [targetId]: {
+            ...existing,
+            tilt: packet.tilt,
+            displacement: packet.displacement,
+            vibration: packet.vibration,
+            crack_signal: packet.crack_signal,
+            temperature: packet.temperature ?? 28.0,
+            battery: packet.battery ?? 95,
+            rssi: packet.rssi ?? -67,
+            packet_loss: packet.packet_loss ?? 0.0,
+            lastUpdateSec: simClockSec,
+            history: {
+              tilt: historyTilt,
+              displacement: historyDisp,
+              vibration: historyVib
+            }
+          }
+        };
+      });
+    });
+
+    const unsubState = telemetryRegistry.subscribeState(() => {
+      setFieldTelemetryStatus(telemetryRegistry.connectionState);
+      setTelemetryMode(telemetryRegistry.operatingMode);
+      setTelemetrySource(telemetryRegistry.operatingMode === 'LIVE' ? 'BLE' : 'SIMULATION');
+      setFieldStatusMessage(telemetryRegistry.statusMessage);
+      
+      if (telemetryRegistry.connectionState === 'CONNECTED') {
+        setEventLog(prev => [
+          {
+            id: `FIELD-LINK-${Date.now()}`,
+            timestamp: formatSimulationTime(simClockSec),
+            simSecond: simClockSec,
+            type: 'ROUTE_RECOVERY',
+            nodeId: 'N01',
+            severity: 'INFO',
+            description: 'FIELD TELEMETRY — LINKED: STRATUM FIELD NODE (N01) live telemetry streaming into intelligence pipeline.'
+          },
+          ...prev
+        ]);
+      } else if (telemetryRegistry.connectionState === 'DISCONNECTED') {
+        setEventLog(prev => [
+          {
+            id: `FIELD-UNLINK-${Date.now()}`,
+            timestamp: formatSimulationTime(simClockSec),
+            simSecond: simClockSec,
+            type: 'ROUTE_RECOVERY',
+            nodeId: 'N01',
+            severity: 'INFO',
+            description: 'Field telemetry unlinked. Reverted to baseline simulation digital twin.'
+          },
+          ...prev
+        ]);
+      }
+    });
+
+    return () => {
+      unsubData();
+      unsubState();
+    };
+  }, [simClockSec, fieldNodeId]);
+
   // Stable advancement function using functional state references
   const advanceSimulation = useCallback(() => {
     setSimClockSec(prevSec => {
@@ -193,7 +301,26 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         }
       );
 
-      setNodes(step.nodes);
+      setNodes(prevNodes => {
+        if (telemetrySource !== 'SIMULATION' && prevNodes['N01']) {
+          return {
+            ...step.nodes,
+            N01: {
+              ...step.nodes['N01'],
+              tilt: prevNodes['N01'].tilt,
+              displacement: prevNodes['N01'].displacement,
+              vibration: prevNodes['N01'].vibration,
+              crack_signal: prevNodes['N01'].crack_signal,
+              temperature: prevNodes['N01'].temperature,
+              battery: prevNodes['N01'].battery,
+              rssi: prevNodes['N01'].rssi,
+              packet_loss: prevNodes['N01'].packet_loss,
+              history: prevNodes['N01'].history
+            }
+          };
+        }
+        return step.nodes;
+      });
       setPanels(step.panels);
       setMeshLinks(step.links);
       setCloudStatus(step.cloudStatus);
@@ -227,7 +354,7 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       return nextSec;
     });
-  }, [currentScenario, cloudStatus, failedNodeId, riskResult.riskScore, consensusResult.score]);
+  }, [currentScenario, cloudStatus, failedNodeId, riskResult.riskScore, consensusResult.score, telemetrySource]);
 
   // Stable Simulation Timer Loop
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -259,7 +386,26 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       }
     );
 
-    setNodes(reconstructed.nodes);
+    setNodes(prevNodes => {
+      if (telemetrySource !== 'SIMULATION' && prevNodes['N01']) {
+        return {
+          ...reconstructed.nodes,
+          N01: {
+            ...reconstructed.nodes['N01'],
+            tilt: prevNodes['N01'].tilt,
+            displacement: prevNodes['N01'].displacement,
+            vibration: prevNodes['N01'].vibration,
+            crack_signal: prevNodes['N01'].crack_signal,
+            temperature: prevNodes['N01'].temperature,
+            battery: prevNodes['N01'].battery,
+            rssi: prevNodes['N01'].rssi,
+            packet_loss: prevNodes['N01'].packet_loss,
+            history: prevNodes['N01'].history
+          }
+        };
+      }
+      return reconstructed.nodes;
+    });
     setPanels(reconstructed.panels);
     setMeshLinks(reconstructed.links);
     setCloudStatus(reconstructed.cloudStatus);
@@ -306,7 +452,7 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       });
     }
     setTelemetryHistory(newHist);
-  }, [currentScenario, cloudStatus, failedNodeId]);
+  }, [currentScenario, cloudStatus, failedNodeId, telemetrySource]);
 
   // Handlers
   const startSimulation = () => setIsRunning(true);
@@ -580,6 +726,18 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setActiveModal('NONE');
   }, []);
 
+  const connectFieldNode = useCallback(async () => {
+    return await telemetryRegistry.connectFieldHardware();
+  }, []);
+
+  const disconnectFieldNode = useCallback(async () => {
+    await telemetryRegistry.disconnectFieldHardware();
+  }, []);
+
+  const injectBenchTelemetry = useCallback((telemetry: Partial<NormalizedTelemetry>) => {
+    telemetryRegistry.injectBenchPacket(telemetry);
+  }, []);
+
   // Global Keyboard Shortcuts (Requirement 131)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -648,6 +806,17 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         selectedNodeId,
         selectedPanelId,
         activeModal,
+        telemetryMode,
+        telemetrySource,
+        fieldTelemetryStatus,
+        fieldNodeId,
+        fieldPacketCount,
+        fieldPacketRateHz,
+        lastFieldPacket,
+        fieldStatusMessage,
+        connectFieldNode,
+        disconnectFieldNode,
+        injectBenchTelemetry,
         startSimulation,
         pauseSimulation,
         togglePlayPause,

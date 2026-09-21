@@ -15,7 +15,8 @@ import {
   ChevronLeft,
   X,
   Keyboard,
-  Tv
+  Tv,
+  Radio
 } from 'lucide-react';
 import type { ScenarioType } from '../../types';
 
@@ -41,7 +42,8 @@ export const QuickActionsToolbar: React.FC = () => {
     demoPhaseName,
     isPresentationMode,
     togglePresentationMode,
-    setActiveModal
+    setActiveModal,
+    telemetryMode
   } = useSimulation();
 
   const scenarios: { id: ScenarioType; label: string }[] = [
@@ -361,6 +363,23 @@ export const QuickActionsToolbar: React.FC = () => {
               >
                 <Smartphone size={13} />
                 <span>SMS</span>
+              </button>
+
+              <button
+                onClick={() => setActiveModal('FIELD_TELEMETRY')}
+                className={`btn-engineering ${telemetryMode === 'LIVE' ? 'primary' : ''}`}
+                style={{
+                  fontSize: '11px',
+                  padding: '5px 9px',
+                  background: telemetryMode === 'LIVE' ? '#09332c' : undefined,
+                  borderColor: telemetryMode === 'LIVE' ? '#059669' : undefined,
+                  color: telemetryMode === 'LIVE' ? '#34d399' : undefined,
+                  fontWeight: 700
+                }}
+                title="Manage Physical Field Telemetry Link (ESP32 Bench Node / Web GATT Adapter)"
+              >
+                <Radio size={13} color={telemetryMode === 'LIVE' ? '#34d399' : '#0284c7'} />
+                <span>{telemetryMode === 'LIVE' ? 'FIELD LINKED' : 'FIELD TELEMETRY'}</span>
               </button>
 
               <button

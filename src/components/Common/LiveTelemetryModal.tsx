@@ -3,17 +3,17 @@ import { useSimulation } from '../../state/simulationContext';
 import { X, Terminal, Copy, Check, Info } from 'lucide-react';
 
 export const LiveTelemetryModal: React.FC = () => {
-  const { activeModal, setActiveModal, nodes, simClockSec, currentScenario } = useSimulation();
+  const { activeModal, setActiveModal, nodes, simClockSec, currentScenario, telemetryMode } = useSimulation();
   const [copied, setCopied] = useState(false);
-  const [selectedNodeKey, setSelectedNodeKey] = useState<string>('N03');
+  const [selectedNodeKey, setSelectedNodeKey] = useState<string>('N01');
 
   if (activeModal !== 'LIVE_TELEMETRY') return null;
 
   const activeNode = nodes[selectedNodeKey] || Object.values(nodes)[0];
 
   const payload = {
-    schema_version: 'bhusthira.telemetry.v1',
-    stream_type: 'SYNTHETIC_SENSOR_TELEMETRY',
+    schema_version: 'stratum.telemetry.v1',
+    stream_type: (telemetryMode === 'LIVE' && selectedNodeKey === 'N01') ? 'FIELD_HARDWARE_LIVE_TELEMETRY' : 'NORMALIZED_SIMULATION_TELEMETRY',
     simulation_clock_sec: simClockSec,
     scenario: currentScenario,
     telemetry_packet: {
@@ -85,7 +85,7 @@ export const LiveTelemetryModal: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Terminal size={16} color="#38bdf8" />
             <span style={{ fontSize: '13px', fontWeight: 600, color: '#f8fafc', fontFamily: 'monospace' }}>
-              Raw Ingestion Stream: SYNTHETIC TELEMETRY
+              FIELD TELEMETRY STREAM &bull; DATA MODE: {telemetryMode === 'LIVE' ? 'LIVE' : 'SIMULATION'}
             </span>
           </div>
 
@@ -174,7 +174,9 @@ export const LiveTelemetryModal: React.FC = () => {
         }}>
           <Info size={14} color="#38bdf8" />
           <span>
-            Telemetry generated deterministically by BHUSTHIRA virtual physics model. TelemetryProvider abstraction is ready for MQTT/LoRaWAN ingestion.
+            {telemetryMode === 'LIVE' && selectedNodeKey === 'N01'
+              ? 'FIELD TELEMETRY — LIVE: Ingesting normalized telemetry from STRATUM FIELD NODE (N01) via TelemetryProvider adapter.'
+              : 'FIELD TELEMETRY — TelemetryProvider abstraction normalizes multi-source sensor payloads into unified STRATUM schema for anomaly detection and risk scoring.'}
           </span>
         </div>
       </div>
