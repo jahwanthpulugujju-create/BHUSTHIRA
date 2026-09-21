@@ -130,6 +130,8 @@ export interface RiskBreakdown {
   temporalAcceleration: number;
 }
 
+export type TelemetrySource = 'SIMULATION' | 'BLE' | 'LORA' | 'MQTT' | 'SERIAL';
+
 export interface TelemetrySnapshot {
   simSecond: number;
   riskScore: number;
@@ -138,6 +140,10 @@ export interface TelemetrySnapshot {
   avgDisp: number;
   avgVib: number;
   activeAnomalousCount: number;
+  source?: TelemetrySource;
+  sourceConnected?: boolean;
+  sourceLabel?: string;
+  lastLivePacketAt?: string;
 }
 
 export interface MeshLink {
