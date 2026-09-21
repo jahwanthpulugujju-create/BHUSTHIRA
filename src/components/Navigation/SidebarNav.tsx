@@ -94,24 +94,33 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, onSelectTab }
       <div style={{ overflowY: 'auto' }}>
         {/* Brand Header Banner */}
         <div style={{
-          padding: '12px 16px',
+          padding: '14px 16px',
           borderBottom: '1px solid #e2e8f0',
           background: '#f8fafc',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center'
+          alignItems: 'flex-start',
+          gap: '2px'
         }}>
-          <img
-            src="/logo-full.png"
-            alt="STRATUM — Stable Mines, Safer Tomorrows"
-            style={{
-              width: '100%',
-              maxWidth: '150px',
-              height: 'auto',
-              display: 'block'
-            }}
-          />
+          <span style={{
+            fontSize: '15px',
+            fontWeight: 900,
+            color: '#09332c',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            lineHeight: 1
+          }}>
+            STRATUM
+          </span>
+          <span style={{
+            fontSize: '9px',
+            fontWeight: 600,
+            color: '#94a3b8',
+            letterSpacing: '0.07em',
+            textTransform: 'uppercase'
+          }}>
+            Stable Mines · Safer Tomorrows
+          </span>
         </div>
 
         {/* Grouped Nav Items */}
