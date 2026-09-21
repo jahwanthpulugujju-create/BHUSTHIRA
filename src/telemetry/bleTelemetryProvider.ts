@@ -92,40 +92,88 @@ export class BleTelemetryProvider implements ITelemetryProvider {
     }
 
     try {
-      this.updateState('SCANNING', 'Searching for MineGuard_Node_01...');
+      this.updateState('SCANNING', 'Opening Bluetooth device picker...');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const navBluetooth = (navigator as any).bluetooth;
 
-      this.device = await navBluetooth.requestDevice({
-        filters: [
-          { name: TELEMETRY_CONFIG.BLE_FIRMWARE.DEVICE_NAME },
-          { services: [TELEMETRY_CONFIG.BLE_FIRMWARE.SERVICE_UUID] }
-        ],
-        optionalServices: [TELEMETRY_CONFIG.BLE_FIRMWARE.SERVICE_UUID]
-      });
+      // First try: filter by service UUID (most reliable for properly advertising ESP32)
+      let device: unknown = null;
+      try {
+        device = await navBluetooth.requestDevice({
+          filters: [
+            { services: [TELEMETRY_CONFIG.BLE_FIRMWARE.SERVICE_UUID] }
+          ],
+          optionalServices: [TELEMETRY_CONFIG.BLE_FIRMWARE.SERVICE_UUID]
+        });
+      } catch (filterErr: unknown) {
+        // If filtered scan finds nothing or user cancelled, fall back to show all devices
+        const filterMsg = filterErr instanceof Error ? filterErr.message : String(filterErr);
+        if (filterMsg.includes('cancelled') || filterMsg.includes('cancel') || filterMsg.includes('User cancelled')) {
+          // User deliberately cancelled
+          this.updateState('DISCONNECTED', 'Device selection cancelled by operator');
+          return false;
+        }
+        // Filter failed (device not advertising service UUID) — fall back to acceptAllDevices
+        this.updateState('SCANNING', 'Retrying with all-devices scan (service UUID not found in advertisement)...');
+        try {
+          device = await navBluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: [TELEMETRY_CONFIG.BLE_FIRMWARE.SERVICE_UUID]
+          });
+        } catch (fallbackErr: unknown) {
+          const fbMsg = fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr);
+          this.updateState('DISCONNECTED', 'Device selection cancelled');
+          this.recordError(`Scan fallback cancelled: ${fbMsg}`);
+          return false;
+        }
+      }
 
-      if (!this.device) {
+      if (!device) {
         this.updateState('DISCONNECTED', 'No hardware sensor selected');
         return false;
       }
 
+      this.device = device;
       this.device.addEventListener('gattserverdisconnected', this.handleDisconnection);
 
-      this.updateState('CONNECTING', 'Connecting to GATT Server...');
+      this.updateState('CONNECTING', `Connecting to GATT Server on ${(this.device as { name?: string }).name || 'device'}...`);
 
       const server = await this.device.gatt.connect();
-      const service = await server.getPrimaryService(TELEMETRY_CONFIG.BLE_FIRMWARE.SERVICE_UUID);
-      this.characteristic = await service.getCharacteristic(TELEMETRY_CONFIG.BLE_FIRMWARE.CHARACTERISTIC_UUID);
 
+      // Try to get the STRATUM service UUID; if not found, report useful diagnostic
+      let service;
+      try {
+        service = await server.getPrimaryService(TELEMETRY_CONFIG.BLE_FIRMWARE.SERVICE_UUID);
+      } catch {
+        const availableServices = 'Run BLE scan to inspect available UUIDs.';
+        const errMsg = `GATT service UUID ${TELEMETRY_CONFIG.BLE_FIRMWARE.SERVICE_UUID} not found on device. ${availableServices} Check firmware sketch SERVICE_UUID matches.`;
+        this.updateState('ERROR', errMsg);
+        this.recordError(errMsg);
+        this.device.gatt.disconnect();
+        return false;
+      }
+
+      let characteristic;
+      try {
+        characteristic = await service.getCharacteristic(TELEMETRY_CONFIG.BLE_FIRMWARE.CHARACTERISTIC_UUID);
+      } catch {
+        const errMsg = `GATT characteristic UUID ${TELEMETRY_CONFIG.BLE_FIRMWARE.CHARACTERISTIC_UUID} not found. Check firmware sketch CHARACTERISTIC_UUID matches.`;
+        this.updateState('ERROR', errMsg);
+        this.recordError(errMsg);
+        this.device.gatt.disconnect();
+        return false;
+      }
+
+      this.characteristic = characteristic;
       await this.characteristic.startNotifications();
       this.characteristic.addEventListener('characteristicvaluechanged', this.handleCharacteristicValueChanged);
 
-      this.updateState('CONNECTED', 'Field node connected and streaming notifications');
+      this.updateState('CONNECTED', `Streaming from ${(this.device as { name?: string }).name || 'field node'}`);
       return true;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       console.warn('BLE Connection Error:', msg);
-      this.updateState('ERROR', msg);
+      this.updateState('ERROR', `Connection failed: ${msg}`);
       this.recordError(msg);
       return false;
     }

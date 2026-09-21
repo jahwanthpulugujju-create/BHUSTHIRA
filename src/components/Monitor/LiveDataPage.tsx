@@ -558,6 +558,61 @@ export const LiveDataPage: React.FC = () => {
       {/* ── Transport Diagnostics ── */}
       <DiagnosticsPanel diag={diagnostics} />
 
+      {/* ── Parser Error Log (shown only when there are errors) ── */}
+      {diagnostics.errors.length > 0 && (
+        <div style={{
+          background: '#ffffff',
+          borderRadius: '10px',
+          border: '1px solid #fecaca',
+          overflow: 'hidden',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
+        }}>
+          <div style={{
+            padding: '8px 14px', background: '#fef2f2',
+            borderBottom: '1px solid #fecaca',
+            display: 'flex', alignItems: 'center', gap: '8px'
+          }}>
+            <AlertTriangle size={13} color="#dc2626" />
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#b91c1c', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              PACKET PARSE ERRORS — {diagnostics.errors.length} RECENT
+            </span>
+            <span style={{ marginLeft: 'auto', fontSize: '10px', color: '#94a3b8' }}>
+              Check firmware JSON field names match STRATUM schema
+            </span>
+          </div>
+          <div style={{ maxHeight: '140px', overflowY: 'auto' }}>
+            {diagnostics.errors.slice(0, 10).map((err, i) => (
+              <div key={i} style={{
+                padding: '5px 14px',
+                borderBottom: '1px solid #fef2f2',
+                display: 'flex', gap: '10px', alignItems: 'flex-start',
+                background: i === 0 ? '#fff5f5' : '#ffffff'
+              }}>
+                <span style={{ fontSize: '10px', color: '#94a3b8', fontFamily: 'monospace', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  {new Date(err.timestamp).toLocaleTimeString('en-IN', { hour12: false })}
+                </span>
+                <span style={{ fontSize: '11px', color: '#b91c1c', fontFamily: 'monospace' }}>
+                  {err.message}
+                  {err.payloadSnippet && (
+                    <span style={{ color: '#94a3b8', marginLeft: '8px' }}>→ {err.payloadSnippet}</span>
+                  )}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div style={{ padding: '6px 14px', background: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
+            <span style={{ fontSize: '10px', color: '#64748b' }}>
+              Expected JSON keys: <code style={{ background: '#f1f5f9', padding: '0 4px', borderRadius: '3px', color: '#0f172a' }}>
+                tilt, displacement, vibration, crack_signal
+              </code>
+              &nbsp;— Aliases also accepted: <code style={{ background: '#f1f5f9', padding: '0 4px', borderRadius: '3px', color: '#0f172a' }}>
+                angle/accel/crack/disp
+              </code>
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* ── Packet Feed ── */}
       <PacketFeed packets={packetFeed} />
 
