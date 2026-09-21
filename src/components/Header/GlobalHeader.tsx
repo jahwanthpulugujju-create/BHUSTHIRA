@@ -111,14 +111,14 @@ export const GlobalHeader: React.FC = () => {
 
       {/* 3. Right: Edge-01, Cloud Islanding, System Band */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        {/* Synthetic Simulation Mode Tag */}
+        {/* Transport-agnostic telemetry status */}
         <div
           className="sim-tag"
-          title="Synthetic sensor telemetry — software-defined digital twin calibrated against baseline"
+          title="Transport-agnostic telemetry provider. Bench hardware may use BLE; production field transport can use LoRa or another gateway adapter."
           style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
         >
-          <Radio size={12} color="#d97706" />
-          <span>SIMULATION MODE</span>
+          <Radio size={12} color="#16a34a" />
+          <span>FIELD TELEMETRY</span>
         </div>
 
         {/* On-Site Edge Node Status */}
