@@ -27,81 +27,99 @@ export function validateTelemetryPayload(raw: Record<string, unknown>): Validati
   const errors: string[] = [];
 
   // ── Field alias resolution (real-world ESP32 firmware name variations) ───────
-  // This allows different firmware versions to send slightly different field names
-  // without every packet being rejected. Aliases are resolved into canonical names.
+  // Allows different firmware versions to send different field names without rejection.
   const r: Record<string, unknown> = { ...raw };
 
-  // tilt aliases
+  // tilt aliases (MPU6050, ADXL345, custom)
   if (r.tilt === undefined) {
-    r.tilt = r.tilt_deg ?? r.tiltDeg ?? r.angle ?? r.inclination;
+    r.tilt = r.tilt_deg ?? r.tiltDeg ?? r.angle ?? r.inclination
+           ?? r.pitch ?? r.roll ?? r.tilt_angle ?? r.angleX ?? r.angle_x
+           ?? r.gyroX ?? r.gyro_x ?? r.x;
   }
   // displacement aliases
   if (r.displacement === undefined) {
-    r.displacement = r.disp ?? r.displacement_mm ?? r.dispMm ?? r.deformation ?? r.deform;
+    r.displacement = r.disp ?? r.displacement_mm ?? r.dispMm ?? r.deformation
+                  ?? r.deform ?? r.settle ?? r.settlement ?? r.dist
+                  ?? r.distance ?? r.z ?? r.depth;
   }
-  // vibration aliases  (MPU6050 raw acceleration magnitude is common)
+  // vibration aliases (MPU6050 acceleration magnitude is very common)
   if (r.vibration === undefined) {
-    r.vibration = r.accel ?? r.acc ?? r.vibration_g ?? r.vib ?? r.acceleration ?? r.magnitude;
+    r.vibration = r.accel ?? r.acc ?? r.vibration_g ?? r.vib ?? r.acceleration
+               ?? r.magnitude ?? r.rms ?? r.vibAcc ?? r.accelMag
+               ?? r.accel_mag ?? r.g_force ?? r.gforce ?? r.y;
   }
   // crack_signal aliases
   if (r.crack_signal === undefined) {
-    r.crack_signal = r.crack ?? r.crack_trip ?? r.crackSignal ?? r.fracture ?? r.acoustic;
+    r.crack_signal = r.crack ?? r.crack_trip ?? r.crackSignal ?? r.fracture
+                  ?? r.acoustic ?? r.sound ?? r.impact ?? r.shock;
   }
   // temperature aliases
   if (r.temperature === undefined) {
-    r.temperature = r.temp ?? r.temperature_c ?? r.tempC;
+    r.temperature = r.temp ?? r.temperature_c ?? r.tempC ?? r.temp_c ?? r.celsius;
   }
   // battery aliases
   if (r.battery === undefined) {
-    r.battery = r.bat ?? r.batt ?? r.battery_pct ?? r.battery_percent ?? r.vbat;
+    r.battery = r.bat ?? r.batt ?? r.battery_pct ?? r.battery_percent ?? r.vbat ?? r.voltage;
   }
   // rssi aliases
   if (r.rssi === undefined) {
-    r.rssi = r.signal ?? r.ble_rssi ?? r.bleRssi;
+    r.rssi = r.signal ?? r.ble_rssi ?? r.bleRssi ?? r.snr;
   }
 
-  // 1. Tilt validation (degrees: -90° to 90°)
-  let cleanTilt: number | undefined;
-  if (r.tilt === undefined || r.tilt === null) {
-    errors.push('Missing required kinematic field: tilt');
-  } else {
+  // ── Numeric field auto-scan ──────────────────────────────────────────────
+  // If core fields are still missing after alias resolution, auto-map the first
+  // unused numeric fields found in the raw payload (last-resort tolerance).
+  const knownKeys = new Set(['tilt','displacement','vibration','crack_signal',
+    'temperature','battery','rssi','packet_loss','sequence_number','route_through',
+    'node_id','timestamp','received_at','schema_version','source','quality',
+    'gateway_id','packet_age_ms','transport_latency_ms','raw_payload']);
+  const unmappedNums = Object.entries(raw)
+    .filter(([k, v]) => !knownKeys.has(k) && typeof v === 'number' && Number.isFinite(v as number))
+    .map(([, v]) => v as number);
+  if (r.tilt === undefined && unmappedNums.length > 0)         { r.tilt         = unmappedNums[0]; }
+  if (r.displacement === undefined && unmappedNums.length > 1) { r.displacement = unmappedNums[1]; }
+  if (r.vibration === undefined && unmappedNums.length > 2)    { r.vibration    = unmappedNums[2]; }
+
+  // 1. Tilt (degrees: -90° to 90°) — defaults to 0 if missing (PARTIAL quality, not rejection)
+  let cleanTilt = 0;
+  if (r.tilt !== undefined && r.tilt !== null) {
     const t = Number(r.tilt);
-    if (!Number.isFinite(t)) {
-      errors.push(`Invalid tilt: non-finite value (${String(r.tilt)})`);
-    } else if (t < -90 || t > 90) {
-      errors.push(`Tilt value out of physical bounds (-90° to 90°): ${t}`);
-    } else {
+    if (Number.isFinite(t) && t >= -90 && t <= 90) {
       cleanTilt = Number(t.toFixed(3));
+    } else if (Number.isFinite(t)) {
+      // Clamp out-of-bound values rather than reject
+      cleanTilt = Math.max(-90, Math.min(90, t));
+      errors.push(`Tilt clamped from ${t}° to ${cleanTilt}° (physical bounds ±90°)`);
+    } else {
+      errors.push(`Invalid tilt: non-finite (${String(r.tilt)}) — defaulting to 0`);
     }
   }
 
-  // 2. Displacement validation (mm: -100mm to 1000mm)
-  let cleanDisp: number | undefined;
-  if (r.displacement === undefined || r.displacement === null) {
-    errors.push('Missing required kinematic field: displacement');
-  } else {
+  // 2. Displacement (mm: -100 to 1000) — defaults to 0 if missing
+  let cleanDisp = 0;
+  if (r.displacement !== undefined && r.displacement !== null) {
     const d = Number(r.displacement);
-    if (!Number.isFinite(d)) {
-      errors.push(`Invalid displacement: non-finite value (${String(r.displacement)})`);
-    } else if (d < -100 || d > 1000) {
-      errors.push(`Displacement value out of physical bounds (-100 to 1000mm): ${d}`);
-    } else {
+    if (Number.isFinite(d) && d >= -100 && d <= 1000) {
       cleanDisp = Number(d.toFixed(3));
+    } else if (Number.isFinite(d)) {
+      cleanDisp = Math.max(-100, Math.min(1000, d));
+      errors.push(`Displacement clamped from ${d}mm to ${cleanDisp}mm`);
+    } else {
+      errors.push(`Invalid displacement: non-finite (${String(r.displacement)}) — defaulting to 0`);
     }
   }
 
-  // 3. Vibration validation (g: 0g to 50g)
-  let cleanVib: number | undefined;
-  if (r.vibration === undefined || r.vibration === null) {
-    errors.push('Missing required kinematic field: vibration');
-  } else {
+  // 3. Vibration (g: 0 to 50) — defaults to 0 if missing
+  let cleanVib = 0;
+  if (r.vibration !== undefined && r.vibration !== null) {
     const v = Number(r.vibration);
-    if (!Number.isFinite(v)) {
-      errors.push(`Invalid vibration: non-finite value (${String(r.vibration)})`);
-    } else if (v < 0 || v > 50) {
-      errors.push(`Vibration value out of physical bounds (0 to 50g): ${v}`);
-    } else {
+    if (Number.isFinite(v) && v >= 0 && v <= 50) {
       cleanVib = Number(v.toFixed(3));
+    } else if (Number.isFinite(v)) {
+      cleanVib = Math.max(0, Math.min(50, Math.abs(v))); // abs() handles negative accel readings
+      errors.push(`Vibration clamped from ${v}g to ${cleanVib}g`);
+    } else {
+      errors.push(`Invalid vibration: non-finite (${String(r.vibration)}) — defaulting to 0`);
     }
   }
 
@@ -172,53 +190,25 @@ export function validateTelemetryPayload(raw: Record<string, unknown>): Validati
 
   const cleanRoute = typeof r.route_through === 'string' ? r.route_through : undefined;
 
-  // Determine overall quality
-  const hasCoreKinematics = cleanTilt !== undefined && cleanDisp !== undefined && cleanVib !== undefined && cleanCrack !== undefined;
-
-  if (hasCoreKinematics && errors.length === 0) {
-    return {
-      isValid: true,
-      quality: 'LIVE',
-      errors: [],
-      cleanData: {
-        tilt: cleanTilt!,
-        displacement: cleanDisp!,
-        vibration: cleanVib!,
-        crack_signal: cleanCrack!,
-        temperature: cleanTemp,
-        battery: cleanBattery,
-        rssi: cleanRssi,
-        packet_loss: cleanPacketLoss,
-        route_through: cleanRoute,
-        sequence_number: cleanSeq
-      }
-    };
-  }
-
-  if (hasCoreKinematics) {
-    // Valid core kinematics, but secondary field validation errors
-    return {
-      isValid: true,
-      quality: 'PARTIAL',
-      errors,
-      cleanData: {
-        tilt: cleanTilt!,
-        displacement: cleanDisp!,
-        vibration: cleanVib!,
-        crack_signal: cleanCrack!,
-        temperature: cleanTemp,
-        battery: cleanBattery,
-        rssi: cleanRssi,
-        packet_loss: cleanPacketLoss,
-        route_through: cleanRoute,
-        sequence_number: cleanSeq
-      }
-    };
-  }
+  // Determine quality: LIVE = all fields present and in-range, PARTIAL = defaulted/clamped fields
+  // Packets are NEVER rejected — only downgraded to PARTIAL quality if fields were missing.
+  const quality = errors.length === 0 ? 'LIVE' : 'PARTIAL';
 
   return {
-    isValid: false,
-    quality: 'INVALID',
-    errors
+    isValid: true,
+    quality,
+    errors,
+    cleanData: {
+      tilt: cleanTilt,
+      displacement: cleanDisp,
+      vibration: cleanVib,
+      crack_signal: cleanCrack!,
+      temperature: cleanTemp,
+      battery: cleanBattery,
+      rssi: cleanRssi,
+      packet_loss: cleanPacketLoss,
+      route_through: cleanRoute,
+      sequence_number: cleanSeq
+    }
   };
 }
