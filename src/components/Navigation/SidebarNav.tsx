@@ -8,13 +8,15 @@ import {
   History,
   Activity,
   Layers,
-  Info
+  Info,
+  Radio
 } from 'lucide-react';
 import { useSimulation } from '../../state/simulationContext';
 
 export type NavTab =
   | 'COMMAND_CENTER'
   | 'MINE_MAP'
+  | 'LIVE_DATA'
   | 'SENSOR_NETWORK'
   | 'DEFORMATION_INTEL'
   | 'RISK_ALERTS'
@@ -45,7 +47,8 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, onSelectTab }
       groupName: 'MONITOR',
       items: [
         { id: 'COMMAND_CENTER', label: 'Command Center', icon: LayoutDashboard },
-        { id: 'MINE_MAP', label: 'Deformation Map', icon: Map }
+        { id: 'MINE_MAP', label: 'Deformation Map', icon: Map },
+        { id: 'LIVE_DATA', label: 'Live Data', icon: Radio }
       ]
     },
     {

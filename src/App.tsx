@@ -5,6 +5,7 @@ import { SidebarNav } from './components/Navigation/SidebarNav';
 import type { NavTab } from './components/Navigation/SidebarNav';
 import { CommandCenter } from './components/CommandCenter/CommandCenter';
 import { MineMapPage } from './components/MineMap/MineMapPage';
+import { LiveDataPage } from './components/Monitor/LiveDataPage';
 import { SensorNetworkPage } from './components/SensorNetwork/SensorNetworkPage';
 import { DeformationIntelligencePage } from './components/DeformationIntelligence/DeformationIntelligencePage';
 import { RiskAlertsPage } from './components/RiskAlerts/RiskAlertsPage';
@@ -64,6 +65,7 @@ const AppShell: React.FC = () => {
         }}>
           {activeTab === 'COMMAND_CENTER' && <CommandCenter />}
           {activeTab === 'MINE_MAP' && <MineMapPage />}
+          {activeTab === 'LIVE_DATA' && <LiveDataPage />}
           {activeTab === 'SENSOR_NETWORK' && <SensorNetworkPage />}
           {activeTab === 'DEFORMATION_INTEL' && <DeformationIntelligencePage />}
           {activeTab === 'RISK_ALERTS' && <RiskAlertsPage />}
