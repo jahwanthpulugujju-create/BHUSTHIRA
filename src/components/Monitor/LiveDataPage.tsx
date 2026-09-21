@@ -1,9 +1,6 @@
 /**
  * STRATUM — LIVE DATA Page
- * Real-time field telemetry dashboard.
- * Subscribes to the transport-agnostic telemetry registry and renders
- * live sensor readings, waveform history, packet diagnostics, and
- * connection health for the currently active field node.
+ * Real-time field telemetry dashboard — light theme.
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -61,11 +58,11 @@ const Waveform: React.FC<WaveformProps> = ({
     const H = canvas.height;
     ctx.clearRect(0, 0, W, H);
 
-    // Grid lines
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    // Subtle grid lines (light)
+    ctx.strokeStyle = '#e2e8f0';
     ctx.lineWidth = 1;
-    for (let i = 0; i <= 4; i++) {
-      const y = (H / 4) * i;
+    for (let i = 0; i <= 3; i++) {
+      const y = (H / 3) * i;
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
     }
 
@@ -99,47 +96,53 @@ const Waveform: React.FC<WaveformProps> = ({
 
   const isWarning = warning !== undefined && value !== null && value >= warning;
   const isCritical = critical !== undefined && value !== null && value >= critical;
-  const statusColor = isCritical ? '#ef4444' : isWarning ? '#f59e0b' : '#22c55e';
+
+  const statusBg    = isCritical ? '#fee2e2' : isWarning ? '#fef3c7' : '#dcfce7';
+  const statusText  = isCritical ? '#b91c1c' : isWarning ? '#92400e' : '#15803d';
+  const statusLabel = isCritical ? '⚠ CRITICAL' : isWarning ? '! WARNING' : '● NOMINAL';
+  const cardBorder  = isCritical ? '#fca5a5' : isWarning ? '#fcd34d' : '#e2e8f0';
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+      background: '#ffffff',
       borderRadius: '10px',
       padding: '14px 16px',
-      border: `1px solid ${isCritical ? '#ef4444' : isWarning ? '#f59e0b' : '#1e293b'}`,
-      boxShadow: isCritical ? '0 0 12px rgba(239,68,68,0.25)' : 'none',
+      border: `1px solid ${cardBorder}`,
+      boxShadow: isCritical
+        ? '0 0 0 3px rgba(239,68,68,0.12), 0 1px 4px rgba(0,0,0,0.06)'
+        : '0 1px 3px rgba(0,0,0,0.06)',
       display: 'flex',
       flexDirection: 'column',
       gap: '8px',
-      transition: 'border-color 0.3s ease'
+      transition: 'border-color 0.3s ease, box-shadow 0.3s ease'
     }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+        <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
           {label}
         </span>
         <span style={{
-          fontSize: '10px', fontWeight: 700, padding: '2px 6px',
-          borderRadius: '3px', background: statusColor + '22', color: statusColor
+          fontSize: '10px', fontWeight: 700, padding: '2px 7px',
+          borderRadius: '4px', background: statusBg, color: statusText
         }}>
-          {isCritical ? '⚠ CRITICAL' : isWarning ? '! WARN' : '● NOMINAL'}
+          {statusLabel}
         </span>
       </div>
 
       {/* Value */}
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-        <span style={{ fontSize: '26px', fontWeight: 800, color: '#f1f5f9', fontFamily: 'monospace', lineHeight: 1 }}>
-          {value !== null ? (Number.isInteger(value) ? value : value.toFixed(2)) : '---'}
+        <span style={{ fontSize: '26px', fontWeight: 800, color: isCritical ? '#dc2626' : '#0f172a', fontFamily: 'monospace', lineHeight: 1 }}>
+          {value !== null ? (Number.isInteger(value) ? value : value.toFixed(2)) : '—'}
         </span>
-        <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>{unit}</span>
+        <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 600 }}>{unit}</span>
       </div>
 
       {/* Canvas waveform */}
       <canvas
         ref={canvasRef}
         width={240}
-        height={52}
-        style={{ width: '100%', height: '52px', borderRadius: '4px' }}
+        height={48}
+        style={{ width: '100%', height: '48px', borderRadius: '4px', background: '#f8fafc' }}
       />
     </div>
   );
@@ -154,31 +157,32 @@ const ConnectionBanner: React.FC<{
   onDisconnect: () => void;
   isSupported: boolean;
 }> = ({ state, message, onConnect, onDisconnect, isSupported }) => {
-  const isConnected = state === 'CONNECTED';
+  const isConnected  = state === 'CONNECTED';
   const isConnecting = state === 'CONNECTING' || state === 'SCANNING' || state === 'RECONNECTING';
-  const isError = state === 'ERROR';
+  const isError      = state === 'ERROR';
 
-  const bannerColor = isConnected ? '#16a34a' : isError ? '#dc2626' : isConnecting ? '#0284c7' : '#475569';
-  const bannerBg = isConnected ? 'rgba(22,163,74,0.1)' : isError ? 'rgba(220,38,38,0.1)' : isConnecting ? 'rgba(2,132,199,0.1)' : 'rgba(71,85,105,0.1)';
+  const dotColor  = isConnected ? '#16a34a' : isError ? '#dc2626' : isConnecting ? '#0284c7' : '#94a3b8';
+  const bg        = isConnected ? '#f0fdf4' : isError ? '#fef2f2' : isConnecting ? '#eff6ff' : '#f8fafc';
+  const border    = isConnected ? '#bbf7d0' : isError ? '#fecaca' : isConnecting ? '#bfdbfe' : '#e2e8f0';
+  const textColor = isConnected ? '#15803d' : isError ? '#b91c1c' : isConnecting ? '#1d4ed8' : '#475569';
 
   return (
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '10px 16px', borderRadius: '8px',
-      background: bannerBg, border: `1px solid ${bannerColor}40`,
-      marginBottom: '16px'
+      background: bg, border: `1px solid ${border}`
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <div style={{
-          width: '10px', height: '10px', borderRadius: '50%',
-          background: bannerColor,
-          animation: isConnecting ? 'pulse 1.2s ease-in-out infinite' : 'none',
-          boxShadow: isConnected ? `0 0 8px ${bannerColor}` : 'none'
+          width: '9px', height: '9px', borderRadius: '50%',
+          background: dotColor,
+          boxShadow: isConnected ? `0 0 6px ${dotColor}` : 'none',
+          animation: isConnecting ? 'liveDataPulse 1.1s ease-in-out infinite' : 'none'
         }} />
-        <span style={{ fontSize: '12px', fontWeight: 700, color: bannerColor, letterSpacing: '0.06em' }}>
+        <span style={{ fontSize: '12px', fontWeight: 700, color: textColor, letterSpacing: '0.06em' }}>
           {state}
         </span>
-        <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+        <span style={{ fontSize: '12px', color: '#64748b' }}>
           {message}
         </span>
       </div>
@@ -190,15 +194,16 @@ const ConnectionBanner: React.FC<{
             disabled={!isSupported}
             style={{
               display: 'flex', alignItems: 'center', gap: '6px',
-              padding: '6px 14px', borderRadius: '5px', border: 'none',
-              background: isSupported ? '#09332c' : '#334155',
-              color: isSupported ? '#4ade80' : '#64748b',
-              fontSize: '12px', fontWeight: 700, cursor: isSupported ? 'pointer' : 'not-allowed',
-              transition: 'opacity 0.2s ease'
+              padding: '6px 16px', borderRadius: '6px',
+              border: isSupported ? '1px solid #09332c' : '1px solid #cbd5e1',
+              background: isSupported ? '#09332c' : '#f1f5f9',
+              color: isSupported ? '#ffffff' : '#94a3b8',
+              fontSize: '12px', fontWeight: 700,
+              cursor: isSupported ? 'pointer' : 'not-allowed'
             }}
           >
             <Wifi size={13} />
-            {isSupported ? 'CONNECT FIELD NODE' : 'WEB BLUETOOTH NOT SUPPORTED'}
+            {isSupported ? 'CONNECT FIELD NODE' : 'WEB BLUETOOTH UNAVAILABLE'}
           </button>
         )}
         {(isConnected || isConnecting) && (
@@ -206,10 +211,10 @@ const ConnectionBanner: React.FC<{
             onClick={onDisconnect}
             style={{
               display: 'flex', alignItems: 'center', gap: '6px',
-              padding: '6px 14px', borderRadius: '5px', border: 'none',
-              background: 'rgba(239,68,68,0.1)', color: '#ef4444',
-              fontSize: '12px', fontWeight: 700, cursor: 'pointer',
-              transition: 'opacity 0.2s ease'
+              padding: '6px 16px', borderRadius: '6px',
+              border: '1px solid #fecaca',
+              background: '#fff1f2', color: '#b91c1c',
+              fontSize: '12px', fontWeight: 700, cursor: 'pointer'
             }}
           >
             <WifiOff size={13} />
@@ -234,43 +239,48 @@ const PacketFeed: React.FC<{ packets: NormalizedTelemetry[] }> = ({ packets }) =
 
   return (
     <div style={{
-      background: '#0a0f1e',
-      borderRadius: '8px',
-      border: '1px solid #1e293b',
+      background: '#ffffff',
+      borderRadius: '10px',
+      border: '1px solid #e2e8f0',
       overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column'
+      boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
     }}>
+      {/* Header */}
       <div style={{
         padding: '8px 14px',
-        background: '#0f172a',
-        borderBottom: '1px solid #1e293b',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px'
+        background: '#f8fafc',
+        borderBottom: '1px solid #e2e8f0',
+        display: 'flex', alignItems: 'center', gap: '8px'
       }}>
-        <Hash size={12} color="#22d3ee" />
-        <span style={{ fontSize: '11px', fontWeight: 700, color: '#22d3ee', letterSpacing: '0.08em' }}>
+        <Hash size={13} color="#0284c7" />
+        <span style={{ fontSize: '11px', fontWeight: 700, color: '#475569', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
           PACKET STREAM
         </span>
         <span style={{
-          marginLeft: 'auto', fontSize: '10px', padding: '1px 6px',
-          background: 'rgba(34,211,238,0.1)', color: '#22d3ee',
-          borderRadius: '3px', fontFamily: 'monospace'
+          marginLeft: 'auto', fontSize: '10px', padding: '1px 7px',
+          background: '#eff6ff', color: '#0284c7',
+          borderRadius: '4px', fontFamily: 'monospace', fontWeight: 600
         }}>
           LAST {packets.length} PACKETS
         </span>
       </div>
+      {/* Column headers */}
+      <div style={{
+        display: 'grid', gridTemplateColumns: '140px 70px 60px 70px 60px 1fr',
+        gap: '8px', padding: '4px 14px',
+        background: '#f8fafc', borderBottom: '1px solid #e2e8f0'
+      }}>
+        {['TIME','NODE','TILT','DISPL','VIB','META'].map(h => (
+          <span key={h} style={{ fontSize: '9px', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.07em' }}>{h}</span>
+        ))}
+      </div>
       <div
         ref={feedRef}
-        style={{
-          height: '200px', overflowY: 'auto', padding: '6px 0',
-          fontFamily: 'monospace', fontSize: '11px'
-        }}
+        style={{ height: '180px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '11px' }}
       >
         {packets.length === 0 ? (
-          <div style={{ color: '#475569', padding: '20px', textAlign: 'center' }}>
-            No packets received — connect a field node to begin ingestion
+          <div style={{ color: '#94a3b8', padding: '24px', textAlign: 'center' }}>
+            No packets — connect a field node to begin ingestion
           </div>
         ) : (
           [...packets].reverse().map((pkt, i) => (
@@ -278,21 +288,21 @@ const PacketFeed: React.FC<{ packets: NormalizedTelemetry[] }> = ({ packets }) =
               key={i}
               style={{
                 display: 'grid',
-                gridTemplateColumns: '140px 70px 60px 60px 60px 1fr',
+                gridTemplateColumns: '140px 70px 60px 70px 60px 1fr',
                 gap: '8px',
-                padding: '3px 14px',
-                color: i === 0 ? '#a5f3fc' : '#64748b',
-                background: i === 0 ? 'rgba(34,211,238,0.05)' : 'transparent',
-                transition: 'background 0.3s ease'
+                padding: '4px 14px',
+                background: i === 0 ? '#eff6ff' : i % 2 === 0 ? '#f8fafc' : '#ffffff',
+                borderBottom: '1px solid #f1f5f9',
+                color: '#334155'
               }}
             >
-              <span>{new Date(pkt.received_at).toLocaleTimeString('en-IN', { hour12: false })}</span>
-              <span style={{ color: '#94a3b8' }}>{pkt.node_id}</span>
-              <span style={{ color: '#fbbf24' }}>{pkt.tilt.toFixed(1)}°</span>
-              <span style={{ color: '#34d399' }}>{pkt.displacement.toFixed(1)}mm</span>
-              <span style={{ color: '#f87171' }}>{pkt.vibration.toFixed(3)}g</span>
-              <span style={{ color: '#22d3ee', fontSize: '10px' }}>
-                {pkt.source} | Q:{pkt.quality} {pkt.rssi !== undefined ? `| RSSI:${pkt.rssi}dBm` : ''}
+              <span style={{ color: '#475569' }}>{new Date(pkt.received_at).toLocaleTimeString('en-IN', { hour12: false })}</span>
+              <span style={{ color: '#0f172a', fontWeight: 600 }}>{pkt.node_id}</span>
+              <span style={{ color: '#b45309' }}>{pkt.tilt.toFixed(1)}°</span>
+              <span style={{ color: '#15803d' }}>{pkt.displacement.toFixed(1)}mm</span>
+              <span style={{ color: '#b91c1c' }}>{pkt.vibration.toFixed(3)}g</span>
+              <span style={{ color: '#0284c7', fontSize: '10px' }}>
+                {pkt.source} | Q:{pkt.quality}{pkt.rssi !== undefined ? ` | RSSI:${pkt.rssi}dBm` : ''}
               </span>
             </div>
           ))
@@ -318,37 +328,38 @@ const DiagnosticsPanel: React.FC<{ diag: DiagnosticsMetrics }> = ({ diag }) => {
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, #0f172a, #1e293b)',
+      background: '#ffffff',
       borderRadius: '10px',
-      border: '1px solid #1e293b',
-      overflow: 'hidden'
+      border: '1px solid #e2e8f0',
+      overflow: 'hidden',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
     }}>
       <div style={{
-        padding: '8px 14px', background: '#0f172a',
-        borderBottom: '1px solid #1e293b',
+        padding: '8px 14px', background: '#f8fafc',
+        borderBottom: '1px solid #e2e8f0',
         display: 'flex', alignItems: 'center', gap: '8px'
       }}>
-        <BarChart2 size={12} color="#a78bfa" />
-        <span style={{ fontSize: '11px', fontWeight: 700, color: '#a78bfa', letterSpacing: '0.08em' }}>
+        <BarChart2 size={13} color="#7c3aed" />
+        <span style={{ fontSize: '11px', fontWeight: 700, color: '#475569', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
           TRANSPORT DIAGNOSTICS
         </span>
       </div>
       <div style={{
         display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '1px', background: '#1e293b'
+        gap: '1px', background: '#e2e8f0'
       }}>
         {items.map(({ label, value, color, icon: Icon }) => (
           <div key={label} style={{
-            background: '#0f172a', padding: '10px 12px',
+            background: '#ffffff', padding: '10px 14px',
             display: 'flex', flexDirection: 'column', gap: '4px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
               <Icon size={11} color={color} />
-              <span style={{ fontSize: '9px', fontWeight: 700, color: '#64748b', letterSpacing: '0.07em' }}>
+              <span style={{ fontSize: '9px', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.07em' }}>
                 {label}
               </span>
             </div>
-            <span style={{ fontSize: '16px', fontWeight: 800, color, fontFamily: 'monospace' }}>
+            <span style={{ fontSize: '18px', fontWeight: 800, color, fontFamily: 'monospace' }}>
               {value}
             </span>
           </div>
@@ -471,103 +482,81 @@ export const LiveDataPage: React.FC = () => {
       </div>
 
       {/* ── Connection Banner ── */}
-      <div style={{ background: '#0f172a', borderRadius: '12px', padding: '16px' }}>
-        <ConnectionBanner
-          state={connectionState}
-          message={statusMessage}
-          onConnect={handleConnect}
-          onDisconnect={handleDisconnect}
-          isSupported={isSupported}
+      <ConnectionBanner
+        state={connectionState}
+        message={statusMessage}
+        onConnect={handleConnect}
+        onDisconnect={handleDisconnect}
+        isSupported={isSupported}
+      />
+
+      {/* ── Sensor Waveform Grid ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+        <Waveform
+          label="GROUND TILT"   unit="°"  color="#d97706"
+          data={series.tilt}         value={latestPacket?.tilt ?? null}
+          min={0} max={20}  warning={5} critical={10}
+        />
+        <Waveform
+          label="DISPLACEMENT"  unit="mm" color="#15803d"
+          data={series.displacement} value={latestPacket?.displacement ?? null}
+          min={0} max={50}  warning={15} critical={30}
+        />
+        <Waveform
+          label="VIBRATION"     unit="g"  color="#b91c1c"
+          data={series.vibration}    value={latestPacket?.vibration ?? null}
+          min={0} max={2}   warning={0.8} critical={1.5}
+        />
+        <Waveform
+          label="TEMPERATURE"   unit="°C" color="#ea580c"
+          data={series.temperature}  value={latestPacket?.temperature ?? null}
+          min={0} max={80}  warning={55} critical={70}
+        />
+        <Waveform
+          label="BATTERY"       unit="%"  color="#7c3aed"
+          data={series.battery}      value={latestPacket?.battery ?? null}
+          min={0} max={100} warning={25} critical={10}
         />
 
-        {/* ── Sensor Waveform Grid ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '12px' }}>
-          <Waveform
-            label="GROUND TILT"
-            unit="°"
-            color="#fbbf24"
-            data={series.tilt}
-            value={latestPacket?.tilt ?? null}
-            min={0} max={20}
-            warning={5} critical={10}
-          />
-          <Waveform
-            label="DISPLACEMENT"
-            unit="mm"
-            color="#34d399"
-            data={series.displacement}
-            value={latestPacket?.displacement ?? null}
-            min={0} max={50}
-            warning={15} critical={30}
-          />
-          <Waveform
-            label="VIBRATION"
-            unit="g"
-            color="#f87171"
-            data={series.vibration}
-            value={latestPacket?.vibration ?? null}
-            min={0} max={2}
-            warning={0.8} critical={1.5}
-          />
-          <Waveform
-            label="TEMPERATURE"
-            unit="°C"
-            color="#fb923c"
-            data={series.temperature}
-            value={latestPacket?.temperature ?? null}
-            min={0} max={80}
-            warning={55} critical={70}
-          />
-          <Waveform
-            label="BATTERY"
-            unit="%"
-            color="#a78bfa"
-            data={series.battery}
-            value={latestPacket?.battery ?? null}
-            min={0} max={100}
-            warning={25} critical={10}
-          />
-
-          {/* Crack Signal Indicator */}
-          <div style={{
-            background: latestPacket?.crack_signal
-              ? 'linear-gradient(135deg, #450a0a, #7f1d1d)'
-              : 'linear-gradient(135deg, #0f172a, #1e293b)',
-            borderRadius: '10px',
-            padding: '14px 16px',
-            border: `1px solid ${latestPacket?.crack_signal ? '#ef4444' : '#1e293b'}`,
-            boxShadow: latestPacket?.crack_signal ? '0 0 20px rgba(239,68,68,0.4)' : 'none',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: '8px',
-            animation: latestPacket?.crack_signal ? 'pulse 0.8s ease-in-out infinite' : 'none',
-            transition: 'all 0.3s ease'
+        {/* ── Crack Signal Card (light) ── */}
+        <div style={{
+          background: latestPacket?.crack_signal ? '#fef2f2' : '#ffffff',
+          border: `1px solid ${latestPacket?.crack_signal ? '#fca5a5' : '#e2e8f0'}`,
+          borderRadius: '10px',
+          padding: '14px 16px',
+          display: 'flex', flexDirection: 'column',
+          justifyContent: 'center', alignItems: 'center', gap: '8px',
+          boxShadow: latestPacket?.crack_signal
+            ? '0 0 0 3px rgba(239,68,68,0.12), 0 1px 4px rgba(0,0,0,0.06)'
+            : '0 1px 3px rgba(0,0,0,0.06)',
+          animation: latestPacket?.crack_signal ? 'liveDataPulse 0.9s ease-in-out infinite' : 'none',
+          transition: 'all 0.3s ease'
+        }}>
+          <span style={{
+            fontSize: '11px', fontWeight: 700, color: '#64748b',
+            letterSpacing: '0.07em', textTransform: 'uppercase', alignSelf: 'flex-start'
           }}>
-            <AlertTriangle
-              size={32}
-              color={latestPacket?.crack_signal ? '#ef4444' : '#334155'}
-            />
-            <span style={{
-              fontSize: '12px', fontWeight: 800, letterSpacing: '0.08em',
-              color: latestPacket?.crack_signal ? '#fca5a5' : '#475569',
-              textTransform: 'uppercase'
-            }}>
-              ACOUSTIC CRACK SIGNAL
-            </span>
-            <span style={{
-              fontSize: '20px', fontWeight: 800, fontFamily: 'monospace',
-              color: latestPacket?.crack_signal ? '#ef4444' : '#1e293b'
-            }}>
-              {latestPacket?.crack_signal ? 'TRIP' : latestPacket ? 'CLEAR' : '---'}
-            </span>
-          </div>
+            ACOUSTIC CRACK SIGNAL
+          </span>
+          <AlertTriangle size={36} color={latestPacket?.crack_signal ? '#dc2626' : '#cbd5e1'} />
+          <span style={{
+            fontSize: '22px', fontWeight: 800, fontFamily: 'monospace',
+            color: latestPacket?.crack_signal ? '#dc2626' : '#94a3b8'
+          }}>
+            {latestPacket?.crack_signal ? 'TRIP' : latestPacket ? 'CLEAR' : '—'}
+          </span>
+          <span style={{
+            fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px',
+            background: latestPacket?.crack_signal ? '#fee2e2' : '#dcfce7',
+            color: latestPacket?.crack_signal ? '#b91c1c' : '#15803d'
+          }}>
+            {latestPacket?.crack_signal ? '⚠ FRACTURE EVENT' : '● NO EVENT'}
+          </span>
         </div>
-
-        {/* ── Diagnostics ── */}
-        <DiagnosticsPanel diag={diagnostics} />
       </div>
+
+      {/* ── Transport Diagnostics ── */}
+      <DiagnosticsPanel diag={diagnostics} />
 
       {/* ── Packet Feed ── */}
       <PacketFeed packets={packetFeed} />
@@ -576,20 +565,20 @@ export const LiveDataPage: React.FC = () => {
       {!isSupported && (
         <div style={{
           padding: '12px 16px', borderRadius: '8px',
-          background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)',
-          fontSize: '12px', color: '#92400e', display: 'flex', alignItems: 'center', gap: '8px'
+          background: '#fefce8', border: '1px solid #fde68a',
+          fontSize: '12px', color: '#78350f', display: 'flex', alignItems: 'center', gap: '8px'
         }}>
-          <AlertTriangle size={14} color="#f59e0b" />
+          <AlertTriangle size={14} color="#d97706" />
           <span>
-            <strong>Web Bluetooth not available.</strong> Use Chrome/Edge on Windows/Android, or run on a device with BLE support. In simulation mode the waveforms still populate from the synthetic telemetry pipeline.
+            <strong>Web Bluetooth unavailable.</strong> Use Chrome or Edge on Windows / Android. In simulation mode the waveforms still populate from the synthetic telemetry pipeline.
           </span>
         </div>
       )}
 
       <style>{`
-        @keyframes pulse {
+        @keyframes liveDataPulse {
           0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
+          50%       { opacity: 0.4; }
         }
       `}</style>
     </div>
