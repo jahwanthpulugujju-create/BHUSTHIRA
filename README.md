@@ -116,18 +116,43 @@ $$\text{Risk} = w_{\text{disp}} \cdot S_{\text{disp}} + w_{\text{spat}} \cdot S_
 
 ---
 
+## Telemetry Integration Architecture
+
+The application is deliberately transport-agnostic. The operator UI and intelligence pipeline do not expose or depend on whether a field node reaches the gateway over BLE, LoRa, MQTT, or serial transport.
+
+```text
+[FIELD NODE]
+ESP32 + sensors
+      ↓
+[TRANSPORT ADAPTER]
+BLE (bench integration) | LoRa (production target) | MQTT | Serial
+      ↓
+[TELEMETRY NORMALIZER]
+BHUSTHIRA telemetry.v1
+      ↓
+[EDGE / INTELLIGENCE]
+Anomaly → Temporal → Spatial → Consensus → Risk
+      ↓
+[OPERATOR UI]
+Map → Evidence → Alert → Replay
+```
+
+The current repository uses deterministic synthetic telemetry for the full digital-twin demonstration. The recommended hardware integration path is to add a BLE adapter that emits the same telemetry schema used by the simulator. The same adapter contract can then be backed by a LoRa gateway later without changing the frontend or intelligence modules.
+
 ## Field Integration Plan
 
 ```
 [Phase 1: Software Simulation] → Active Prototype
        ↓
-[Phase 2: Bench Hardware Integration] → Connect ESP32-S3 test bench via MQTT broker
+[Phase 2: BLE Bench Integration] → ESP32 telemetry over browser-compatible BLE
        ↓
-[Phase 3: Controlled Field Calibration] → Deploy benchmark inclinometer cluster on surface panel
+[Phase 3: Gateway Integration] → LoRa adapter emits the same telemetry.v1 schema
        ↓
-[Phase 4: Mine-Specific Geotechnical Calibration] → Factor in seam depth (-240m), extraction thickness, and lithology
+[Phase 4: Controlled Field Calibration] → Benchmark inclinometer/displacement cluster
        ↓
-[Phase 5: Operational Deployment] → Full Integration with Mine SCADA, Control Room sirens, and SMS broadcast
+[Phase 5: Mine-Specific Geotechnical Calibration] → Site-specific model validation
+       ↓
+[Phase 6: Operational Deployment] → Mine control-room / SCADA integration
 ```
 
 ---
