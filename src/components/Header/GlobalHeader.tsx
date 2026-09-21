@@ -58,7 +58,7 @@ export const GlobalHeader: React.FC = () => {
               color: '#ffffff',
               letterSpacing: '0.04em'
             }}>
-              SIH26025
+              Prototype
             </span>
           </div>
           <p style={{ fontSize: '11px', color: '#64748b', fontWeight: 600, margin: '2px 0 0 0', lineHeight: 1 }} title="Real-Time Mine Subsidence Intelligence & Early Warning System">

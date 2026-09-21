@@ -119,7 +119,7 @@ export const DeploymentArchitecturePage: React.FC = () => {
 
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: '11px', color: '#64748b' }}>Target Application</div>
-          <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>SIH26025 Coal Mine Subsidence</div>
+          <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>Coal Mine Subsidence Monitoring</div>
         </div>
       </div>
 
@@ -275,7 +275,7 @@ export const DeploymentArchitecturePage: React.FC = () => {
           Low-Cost Physical Sensor Specifications
         </h2>
         <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#64748b' }}>
-          Designed around commercially available, industrial-grade MEMS components to fulfill the "Low Cost" requirement of SIH26025.
+          Designed around commercially available, industrial-grade MEMS components to fulfill the "Low Cost" requirement for real-world deployments.
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
@@ -399,7 +399,7 @@ export const DeploymentArchitecturePage: React.FC = () => {
         <div>
           <strong>Statutory Compliance & Field Calibration Notice:</strong>
           <p style={{ margin: '4px 0 0 0' }}>
-            STRATUM is a software-defined digital twin demonstration developed for SIH26025. 
+            STRATUM is a software-defined digital twin demonstration for real-time mine subsidence intelligence. 
             All measurements, scores, and topology graphs presented in this release are <strong>synthetic simulation artifacts</strong>. 
             Physical deployment in actual underground coal mines requires strict compliance with the Directorate General of Mines Safety (DGMS) regulations, 
             Intrinsically Safe (IS) equipment certification under PESO/CIMFR standards, and mine-specific geomechanical calibration before any life-critical operational use.

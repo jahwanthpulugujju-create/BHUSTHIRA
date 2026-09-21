@@ -85,7 +85,7 @@ const AppShell: React.FC = () => {
             alignItems: 'center'
           }}>
             <div>
-              <strong>STRATUM</strong> • SIH26025 Prototype • 
+              <strong>STRATUM</strong> • Prototype • 
               {telemetryMode === 'LIVE' ? (
                 <span style={{ marginLeft: '4px', color: '#16a34a', fontWeight: 700 }}>
                   FIELD TELEMETRY — LINKED • NODE {fieldNodeId || 'N01'} LIVE • Physical Sensor Ingestion Active

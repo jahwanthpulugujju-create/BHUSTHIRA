@@ -32,7 +32,7 @@ export function getScenarioStateAtTime(
     nodeManualFailId?: string | null;
   }
 ): ScenarioStepState {
-  const seed = options?.seed || 'STRATUM-SIH26025';
+  const seed = options?.seed || 'STRATUM-PROTOTYPE';
   const updatedNodes: Record<string, SensorNode> = {};
   const updatedPanels: Record<string, MinePanel> = {};
   let updatedLinks: MeshLink[] = baseLinks.map(l => ({ ...l }));

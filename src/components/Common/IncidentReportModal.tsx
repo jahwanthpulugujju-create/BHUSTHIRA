@@ -148,7 +148,7 @@ export const IncidentReportModal: React.FC = () => {
               </div>
             </div>
             <div style={{ textAlign: 'right', fontSize: '11px', color: '#64748b' }}>
-              <div><strong style={{ color: '#0f172a' }}>SIH26025</strong> Prototype Dossier</div>
+              <div><strong style={{ color: '#0f172a' }}>STRATUM</strong> Prototype Dossier</div>
               <div>Generated: {new Date().toISOString().replace('T', ' ').substring(0, 19)} UTC</div>
             </div>
           </div>
@@ -166,7 +166,7 @@ export const IncidentReportModal: React.FC = () => {
           }}>
             <ShieldAlert size={16} color="#d97706" style={{ flexShrink: 0 }} />
             <span>
-              <strong>Simulation Incident Report:</strong> This document was generated automatically from synthetic telemetry for hackathon evaluation (SIH26025). 
+              <strong>Simulation Incident Report:</strong> This document was generated automatically from synthetic telemetry for evaluation purposes. 
               Not an official Directorate General of Mines Safety (DGMS) regulatory certificate.
             </span>
           </div>
